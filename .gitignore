@@ -243,3 +243,5 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.gitignore.io/api/osx,code,ruby,rails,linux,macos,windows,sublimetext
+
+.passwords
