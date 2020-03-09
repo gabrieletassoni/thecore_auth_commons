@@ -1,6 +1,6 @@
 require "thecore_auth/engine"
 
-require 'devise'
+# require 'devise'
 require 'cancancan'
 
 module ThecoreAuth
