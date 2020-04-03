@@ -1,4 +1,11 @@
 class User < ApplicationRecord
+  # TODO: If it works, these must be added to another gem one which deal 
+  # more with sessions
+  # devise :recoverable
+  # devise :rememberable
+  # devise :trackable
+  # devise :validatable
+  # devise :timeoutable, timeout_in: 30.minutes 
   # REFERENCES
   has_many :role_users, dependent: :destroy, inverse_of: :user
   has_many :roles, through: :role_users, inverse_of: :users
@@ -14,7 +21,7 @@ class User < ApplicationRecord
   end
 
   def display_name
-    username
+    email
   end
 
   def has_role? role

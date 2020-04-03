@@ -1,5 +1,5 @@
 module Abilities
-    class ThecoreAuth
+    class ThecoreAuthCommons
       include CanCan::Ability
       def initialize user
         if user

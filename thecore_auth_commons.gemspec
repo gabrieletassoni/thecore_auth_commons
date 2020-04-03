@@ -1,17 +1,17 @@
 $:.push File.expand_path("lib", __dir__)
 
 # Maintain your gem's version:
-require "thecore_auth/version"
+require "thecore_auth_commons/version"
 
 # Describe your gem and declare its dependencies:
 Gem::Specification.new do |spec|
-  spec.name        = "thecore_auth"
-  spec.version     = ThecoreAuth::VERSION
+  spec.name        = "thecore_auth_commons"
+  spec.version     = ThecoreAuthCommons::VERSION
   spec.authors     = [""]
   spec.email       = ["gabriele.tassoni@gmail.com"]
-  spec.homepage    = "https://github.com/gabrieletassoni/thecore_auth"
+  spec.homepage    = "https://github.com/gabrieletassoni/thecore_auth_commons"
   spec.summary     = "Common Auth methods and models to be used in thecore components."
-  spec.description = "Provides common User and Role models and Authentication and Authorization via Devise and CanCanCan that can be used or extendend in other engines."
+  spec.description = "Provides common User and Role models to attach Authentication and Authorization via your preferred gem."
   spec.license     = "MIT"
 
   # Prevent pushing this gem to RubyGems.org. To allow pushes either set the 'allowed_push_host'
@@ -27,8 +27,7 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "rails", "~> 6.0.2", ">= 6.0.2.1"
 
-  # spec.add_dependency "devise", "~> 4.7"
   spec.add_dependency "cancancan", "~> 3.0"
-
+  
   spec.add_development_dependency "sqlite3"
 end

@@ -3,7 +3,7 @@ require_relative 'boot'
 require 'rails/all'
 
 Bundler.require(*Rails.groups)
-require "thecore_auth"
+require "thecore_auth_commons"
 
 module Dummy
   class Application < Rails::Application
