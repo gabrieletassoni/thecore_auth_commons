@@ -1,7 +1,10 @@
 class User < ApplicationRecord
+  # Include default devise modules. Others available are:
+  # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
+  devise :database_authenticatable
   # TODO: If it works, these must be added to another gem one which deal 
   # more with sessions
-  # devise :recoverable
+  # devise :database_authenticatable
   # devise :rememberable
   # devise :trackable
   # devise :validatable
@@ -10,7 +13,6 @@ class User < ApplicationRecord
   has_many :role_users, dependent: :destroy, inverse_of: :user
   has_many :roles, through: :role_users, inverse_of: :users
   # VALIDATIONS
-  validates :username, uniqueness: { case_sensitive: false }, format: { with: /\A[a-zA-Z0-9]+\z/, on: :create}, length: { in: 4..15 }, presence: true
   validates :email, uniqueness: { case_sensitive: false }, presence: true, format: { with: /\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\Z/i }
   validates :password, presence: true, on: :create
   validates :password_confirmation, presence: true, on: :create

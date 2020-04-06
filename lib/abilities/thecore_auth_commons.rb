@@ -1,17 +1,20 @@
 module Abilities
     class ThecoreAuthCommons
-      include CanCan::Ability
-      def initialize user
-        if user
-            cannot :manage, :all
-            if user.admin?
-                can :manage, :all # only allow admin users to access everything
-                cannot :destroy, User do |u|
-                    # prevents suicides
-                    u.id == user.id
+        include CanCan::Ability
+        def initialize user
+            # Main abilities file for Thecore applications
+            if user
+                # Users' abilities
+                # -
+                if user.admin?
+                    # Admins' abiities
+                    can :manage, :all # only allow admin users to access Rails Admin
+                    cannot :destroy, User do |u|
+                        # prevents killing himself
+                        u.id == user.id
+                    end
                 end
             end
         end
-      end
     end
-  end
+end

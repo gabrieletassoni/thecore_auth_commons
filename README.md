@@ -18,7 +18,7 @@ $ bundle
 
 Or install it yourself as:
 ```bash
-$ gem install thecore_auth
+$ gem install thecore_auth_commons
 ```
 
 ## Contributing
