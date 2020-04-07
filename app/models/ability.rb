@@ -36,7 +36,7 @@ class Ability
     self.merge Abilities::ThecoreAuthCommons.new user
     # Other Abilities
     Abilities.constants(false).each do |ability|
-      unless ability == "ThecoreAuthCommons"
+      unless ability.to_s == "ThecoreAuthCommons"
         const = Abilities.const_get(ability) 
         self.merge const.new(user) if const.is_a? Class
       end

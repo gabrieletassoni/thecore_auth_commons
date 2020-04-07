@@ -3,7 +3,7 @@ module Abilities
         include CanCan::Ability
         def initialize user
             # Main abilities file for Thecore applications
-            if user
+            if user.present?
                 # Users' abilities
                 # -
                 if user.admin?
