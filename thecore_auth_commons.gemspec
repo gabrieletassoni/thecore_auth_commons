@@ -7,7 +7,7 @@ require "thecore_auth_commons/version"
 Gem::Specification.new do |spec|
   spec.name        = "thecore_auth_commons"
   spec.version     = ThecoreAuthCommons::VERSION
-  spec.authors     = [""]
+  spec.authors     = ["Gabriele Tassoni"]
   spec.email       = ["gabriele.tassoni@gmail.com"]
   spec.homepage    = "https://github.com/gabrieletassoni/thecore_auth_commons"
   spec.summary     = "Common Auth methods and models to be used in thecore components."
@@ -26,8 +26,15 @@ Gem::Specification.new do |spec|
   spec.files = Dir["{app,config,db,lib}/**/*", "MIT-LICENSE", "Rakefile", "README.md"]
 
   spec.add_dependency "rails", "~> 6.0.2", ">= 6.0.2.1"
+  # Authentication
+  # https://github.com/heartcombo/devise
   spec.add_dependency 'devise', '~> 4.7'
+  # Authorization
+  # https://github.com/CanCanCommunity/cancancan
   spec.add_dependency 'cancancan', '~> 3.1'
-  
-  spec.add_development_dependency "sqlite3"
+  # Pagination
+  # https://github.com/amatsuda/kaminari
+  spec.add_dependency 'kaminari', "~> 1.1"
+
+  spec.add_development_dependency "sqlite3", "~> 1.4"
 end
