@@ -9,7 +9,5 @@ Rails.application.configure do
             Rails.configuration.eager_load_namespaces.each(&:eager_load!) if Rails.version.to_i == 5 #Rails 5
             Zeitwerk::Loader.eager_load_all if Rails.version.to_i >= 6 #Rails 6
         end
-
-        ActionController.send(:include, ::ThecoreAuthCommonsActioncontrollerConcerns)
     end
 end
