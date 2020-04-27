@@ -1,3 +1,5 @@
+require 'thecore_auth_commons_actioncontroller_concerns'
+
 Rails.application.configure do
     config.after_initialize do
         # In development be sure to load all the namespaces
