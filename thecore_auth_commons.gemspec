@@ -35,10 +35,6 @@ Gem::Specification.new do |spec|
   # Pagination
   # https://github.com/amatsuda/kaminari
   spec.add_dependency 'kaminari', "~> 1.1"
-  # Auto Locale
-  # A gem which helps you detect the users preferred language, as sent by the "Accept-Language" HTTP header.
-  # https://github.com/iain/http_accept_language
-  spec.add_dependency 'http_accept_language', "~> 2.1"
 
   spec.add_development_dependency "sqlite3", "~> 1.4"
 end
