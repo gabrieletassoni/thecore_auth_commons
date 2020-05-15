@@ -2,6 +2,8 @@ class User < ApplicationRecord
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
   devise :database_authenticatable
+  devise :trackable
+  devise :validatable
   # TODO: If it works, these must be added to another gem one which deal 
   # more with sessions
   # devise :database_authenticatable
