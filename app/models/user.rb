@@ -23,17 +23,22 @@ class User < ApplicationRecord
     # Don't want admin == false if the current user is the only admin
     record.errors.add(attr, I18n.t("validation.errors.cannot_unadmin_last_admin")) if record.admin_changed? && record.admin_was == true && User.where(admin: true).count == 1
   end
-
+  
   def display_name
     email
   end
-
+  
   def has_role? role
     roles.include? role
   end
-
+  
+  def authenticate password
+    puts "PASSWORD: #{password}"
+    self&.valid_password?(password) ? self : nil
+  end
+  
   protected
-
+  
   def check_password_and_confirmation_equal
     errors.add(:password, I18n.t("validation.errors.password_and_confirm_must_be_the_same")) unless password == password_confirmation
   end
