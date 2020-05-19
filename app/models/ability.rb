@@ -41,5 +41,10 @@ class Ability
         self.merge const.new(user) if const.is_a? Class
       end
     end
+    # Overrides from the database defined permissions
+    ::Permission.joins(roles: :users).where(users: {id: user.id}).order(:id).each do |permission|
+      # E.g. can :manage, :all
+      self.send(permission.predicate.name.to_sym, permission.action.name.to_sym, (permission.target.name.classify.constantize rescue permission.target.name.to_sym))
+    end
   end
 end

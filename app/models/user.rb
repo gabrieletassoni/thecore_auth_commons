@@ -23,6 +23,10 @@ class User < ApplicationRecord
     # Don't want admin == false if the current user is the only admin
     record.errors.add(attr, I18n.t("validation.errors.cannot_unadmin_last_admin")) if record.admin_changed? && record.admin_was == true && User.where(admin: true).count == 1
   end
+  validates_each :locked do |record, attr, value|
+    # Don't want locked == true if the current user is the only admin
+    record.errors.add(attr, I18n.t("validation.errors.cannot_lock_last_admin")) if record.locked_changed? && record.locked_was == false && User.where(locked: false).count == 1
+  end
   
   def display_name
     email
