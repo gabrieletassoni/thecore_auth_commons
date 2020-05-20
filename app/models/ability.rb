@@ -1,5 +1,4 @@
 # frozen_string_literal: true
-require 'abilities/thecore_auth_commons'
 
 class Ability
   include CanCan::Ability
