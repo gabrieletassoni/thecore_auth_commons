@@ -1,0 +1,10 @@
+it:
+    permissions:
+        predicates:
+            can: Può
+            cannot: Non può
+        actions:
+            manage: Gestire
+            read: Leggere
+            update: Modificare
+            destroy: Eliminare

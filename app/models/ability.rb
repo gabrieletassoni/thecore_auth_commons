@@ -1,5 +1,4 @@
 # frozen_string_literal: true
-require 'abilities/thecore_auth_commons'
 
 class Ability
   include CanCan::Ability
@@ -40,6 +39,11 @@ class Ability
         const = Abilities.const_get(ability) 
         self.merge const.new(user) if const.is_a? Class
       end
+    end
+    # Overrides from the database defined permissions
+    ::Permission.joins(roles: :users).where(users: {id: user.id}).order(:id).each do |permission|
+      # E.g. can :manage, :all
+      self.send(permission.predicate.name.to_sym, permission.action.name.to_sym, (permission.target.name.classify.constantize rescue permission.target.name.to_sym))
     end
   end
 end

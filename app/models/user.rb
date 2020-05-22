@@ -2,6 +2,8 @@ class User < ApplicationRecord
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
   devise :database_authenticatable
+  devise :trackable
+  devise :validatable
   # TODO: If it works, these must be added to another gem one which deal 
   # more with sessions
   # devise :database_authenticatable
@@ -21,17 +23,26 @@ class User < ApplicationRecord
     # Don't want admin == false if the current user is the only admin
     record.errors.add(attr, I18n.t("validation.errors.cannot_unadmin_last_admin")) if record.admin_changed? && record.admin_was == true && User.where(admin: true).count == 1
   end
-
+  validates_each :locked do |record, attr, value|
+    # Don't want locked == true if the current user is the only admin
+    record.errors.add(attr, I18n.t("validation.errors.cannot_lock_last_admin")) if record.locked_changed? && record.locked_was == false && User.where(locked: false).count == 1
+  end
+  
   def display_name
     email
   end
-
+  
   def has_role? role
     roles.include? role
   end
-
+  
+  def authenticate password
+    puts "PASSWORD: #{password}"
+    self&.valid_password?(password) ? self : nil
+  end
+  
   protected
-
+  
   def check_password_and_confirmation_equal
     errors.add(:password, I18n.t("validation.errors.password_and_confirm_must_be_the_same")) unless password == password_confirmation
   end

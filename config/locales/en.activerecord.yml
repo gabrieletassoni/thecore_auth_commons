@@ -1,0 +1,11 @@
+en:
+  activerecord:
+    models:
+      user:
+        one: User
+        other: Users
+    descriptions:
+      user: Section to manage users.
+      role: Section to manage Roles
+      permission: Section to manage Permissions
+    
