@@ -33,7 +33,7 @@ class User < ApplicationRecord
   end
   
   def has_role? role
-    roles.include? role
+    roles.include? role.to_s
   end
   
   def authenticate password
