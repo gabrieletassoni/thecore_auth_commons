@@ -37,7 +37,6 @@ class User < ApplicationRecord
   end
   
   def authenticate password
-    puts "PASSWORD: #{password}"
     self&.valid_password?(password) ? self : nil
   end
   
