@@ -44,6 +44,6 @@ class Ability
     ::Permission.joins(roles: :users).where(users: {id: user.id}).order(:id).each do |permission|
       # E.g. can :manage, :all
       self.send(permission.predicate.name.to_sym, permission.action.name.to_sym, (permission.target.name.classify.constantize rescue permission.target.name.to_sym))
-    end
+    end unless user.blank?
   end
 end
