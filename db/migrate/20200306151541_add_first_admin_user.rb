@@ -46,7 +46,7 @@ class AddFirstAdminUser < ActiveRecord::Migration[6.0]
     u.password = psswd
     u.password_confirmation = psswd
     u.admin = true
-    u.save!
+    u.save(validate: false)
     puts "\nPlease find generated initial admin password in .passwords file."
     File.open('.passwords', 'w') do |f|
       f.write(psswd)
