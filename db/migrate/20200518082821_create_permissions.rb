@@ -1,32 +1,31 @@
 class CreatePermissions < ActiveRecord::Migration[6.0]
   def change
-    @values = {
-      predicates: %i[can cannot],
-      actions: %i[manage create read update destroy],
-      targets: ApplicationRecord.subclasses.map {|d| d.to_s.underscore}.to_a.unshift(:all)
-    }
-
-    def create_and_fill table
-      create_table table do |t|
-        t.string :name
-        t.bigint :lock_version
-
-        t.timestamps
-      end
-      add_index table, :name, unique: true
-      model = table.to_s.classify.constantize
-      model.reset_column_information
-      model.upsert_all @values[table].map { |p| {name: p, created_at: Time.now, updated_at: Time.now} }, unique_by: [:name]
-    end
-
     # Predicates
-    create_and_fill :predicates
+    create_table :predicates do |t|
+      t.string :name
+      t.bigint :lock_version
+
+      t.timestamps
+    end
+    add_index :predicates, :name, unique: true
     
     # Actions
-    create_and_fill :actions
+    create_table :actions do |t|
+      t.string :name
+      t.bigint :lock_version
+
+      t.timestamps
+    end
+    add_index :actions, :name, unique: true
     
     # Targets
-    create_and_fill :targets
+    create_table :targets do |t|
+      t.string :name
+      t.bigint :lock_version
+
+      t.timestamps
+    end
+    add_index :targets, :name, unique: true
 
     create_table :permissions do |t|
       t.references :predicate, null: false, foreign_key: true
