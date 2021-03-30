@@ -2,12 +2,13 @@ puts "Loading ThecoreAuthCommons seeds"
 email = ENV["ADMIN_EMAIL"].presence || "admin@example.com"
 psswd = ENV["ADMIN_PASSWORD"].presence || "changeme"
 
-u = User.find_or_initialize_by(email: email)
-u.username = "Administrator"
-u.password = u.password_confirmation = psswd
-u.admin = true
-u.save(validate: false)
-
+unless User.where(admin: true).exists?
+    u = User.find_or_initialize_by(email: email)
+    u.username = "Administrator"
+    u.password = u.password_confirmation = psswd
+    u.admin = true
+    u.save(validate: false)
+end
 
 @values = {
     predicates: %i[can cannot],
