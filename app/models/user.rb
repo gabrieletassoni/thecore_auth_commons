@@ -10,7 +10,15 @@ class User < ApplicationRecord
   # devise :rememberable
   # devise :trackable
   # devise :validatable
-  # devise :timeoutable, timeout_in: 30.minutes 
+  # devise :timeoutable, timeout_in: 30.minutes
+          
+  before_validation on: :create do
+    # If the generated uuid is not already present, then create the user with the proposed uuid
+    # Otherwise, try to generate another one
+    begin
+        self.access_token = SecureRandom.uuid #urlsafe_base64(32)
+    end while ::User.exists?(access_token: self.access_token)
+  end
   # REFERENCES
   has_many :role_users, dependent: :destroy, inverse_of: :user
   has_many :roles, through: :role_users, inverse_of: :users
@@ -19,6 +27,7 @@ class User < ApplicationRecord
   validates :password, presence: true, on: :create
   validates :password_confirmation, presence: true, on: :create
   validate :check_password_and_confirmation_equal
+  validates :access_token, uniqueness: true
   validates_each :admin do |record, attr, value|
     # Don't want admin == false if the current user is the only admin
     record.errors.add(attr, I18n.t("validation.errors.cannot_unadmin_last_admin")) if record.admin_changed? && record.admin_was == true && User.where(admin: true).count == 1
