@@ -16,3 +16,4 @@ gemspec
 
 gem 'devise'
 gem 'cancancan'
+gem 'activerecord-nulldb-adapter'

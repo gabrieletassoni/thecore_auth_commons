@@ -1,6 +1,7 @@
 require 'devise'
 require 'cancancan'
 require 'kaminari'
+require 'activerecord-nulldb-adapter'
 require 'abilities/thecore_auth_commons'
 
 require "thecore_auth_commons/engine"

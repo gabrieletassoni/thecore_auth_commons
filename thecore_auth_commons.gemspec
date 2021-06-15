@@ -36,5 +36,7 @@ Gem::Specification.new do |spec|
   # https://github.com/amatsuda/kaminari
   spec.add_dependency 'kaminari', "~> 1.1"
 
+  spec.add_dependency 'activerecord-nulldb-adapter', '~> 0.7'
+
   spec.add_development_dependency "sqlite3", "~> 1.4"
 end
