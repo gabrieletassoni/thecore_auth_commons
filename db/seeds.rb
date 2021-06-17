@@ -15,7 +15,7 @@ User.all.each do |u|
     if u.access_token.blank?
         begin
             u.access_token = SecureRandom.uuid #urlsafe_base64(32)
-        end while ::User.exists?(access_token: self.access_token)
+        end while ::User.exists?(access_token: u.access_token)
         u.save(validate: false)
     end
 end
