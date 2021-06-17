@@ -10,6 +10,16 @@ unless User.where(admin: true).exists?
     u.save(validate: false)
 end
 
+# If there are previous users without the access_token, create it:
+User.all.each do |u|
+    if u.access_token.blank?
+        begin
+            u.access_token = SecureRandom.uuid #urlsafe_base64(32)
+        end while ::User.exists?(access_token: self.access_token)
+        u.save(validate: false)
+    end
+end
+
 @values = {
     predicates: %i[can cannot],
     actions: %i[manage create read update destroy],
