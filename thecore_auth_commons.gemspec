@@ -38,5 +38,7 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency 'activerecord-nulldb-adapter', '~> 0.7'
 
+  spec.add_dependency 'activerecord-hierarchical_query', '~> 1.3'
+
   spec.add_development_dependency "sqlite3", "~> 1.4"
 end
