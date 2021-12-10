@@ -24,8 +24,10 @@ it:
         password_confirmation: Conferma Password
       role:
         users: Utenti
-        name: Nome
+        name: Ruolo
         permissions: Permessi
+        created_at: Data di creazione
+        updated_at: Ultimo aggiornamento
       permission:
         predicate: Predicato
         action: Azione
