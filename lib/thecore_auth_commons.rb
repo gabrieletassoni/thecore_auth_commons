@@ -2,7 +2,7 @@ require 'devise'
 require 'cancancan'
 require 'kaminari'
 require 'activerecord-nulldb-adapter'
-require 'active_record/hierarchical_query'
+# require 'active_record/hierarchical_query'
 require 'abilities/thecore_auth_commons'
 
 require "thecore_auth_commons/engine"

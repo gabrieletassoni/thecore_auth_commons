@@ -25,20 +25,23 @@ Gem::Specification.new do |spec|
 
   spec.files = Dir["{app,config,db,lib}/**/*", "MIT-LICENSE", "Rakefile", "README.md"]
 
-  spec.add_dependency "rails", "~> 6.0"
+  spec.add_dependency "rails", "~> 7.0"
   # Authentication
   # https://github.com/heartcombo/devise
-  spec.add_dependency 'devise', '~> 4.7'
+  spec.add_dependency 'devise', '~> 4.8'
   # Authorization
   # https://github.com/CanCanCommunity/cancancan
-  spec.add_dependency 'cancancan', '~> 3.1'
+  spec.add_dependency 'cancancan', '~> 3.4'
   # Pagination
-  # https://github.com/amatsuda/kaminari
-  spec.add_dependency 'kaminari', "~> 1.1"
+  # https://github.com/kaminari/kaminari
+  spec.add_dependency 'kaminari', "~> 1.2"
 
+  # https://github.com/nulldb/nulldb
   spec.add_dependency 'activerecord-nulldb-adapter', '~> 0.7'
-
-  spec.add_dependency 'activerecord-hierarchical_query', '~> 1.3'
+  
+  # https://github.com/take-five/activerecord-hierarchical_query
+  # Incompatible with pg higher than 1.4
+  # spec.add_dependency 'activerecord-hierarchical_query', '~> 1.4'
 
   spec.add_development_dependency "sqlite3", "~> 1.4"
 end

@@ -4,7 +4,7 @@ psswd = ENV["ADMIN_PASSWORD"].presence || "changeme"
 
 unless User.where(admin: true).exists?
     u = User.find_or_initialize_by(email: email)
-    u.username = "Administrator"
+    u.username = "Administrator" if u.respond_to? :username=
     u.password = u.password_confirmation = psswd
     u.admin = true
     u.save(validate: false)
