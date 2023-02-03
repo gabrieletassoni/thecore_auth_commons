@@ -1,0 +1,10 @@
+en:
+    permissions:
+        predicates:
+            can: Can
+            cannot: Cannot
+        actions:
+            manage: Manage
+            read: Read
+            update: Update
+            destroy: Destroy
