@@ -4,8 +4,36 @@ en:
       user:
         one: User
         other: Users
+      role:
+        one: Role
+        other: Roles
+      permission:
+        one: Permission
+        other: Permissions
+    attributes:
+      user:
+        email: E-Mail
+        username: Username
+        code: Code
+        roles: Roles
+        admin: Administrator?
+        created_at: Created at
+        locked: Locked?
+        third_party: Third party?
+        password: Password
+        password_confirmation: Password confirmation
+      role:
+        users: Users
+        name: Role
+        permissions: Permissions
+        created_at: Created at
+        updated_at: Updated at
+      permission:
+        predicate: Predicate
+        action: Action
+        model: Model
     descriptions:
-      user: Section to manage users.
-      role: Section to manage Roles
-      permission: Section to manage Permissions
+      user: In this section of the application you can search the list of users in different ways using filters or sort the list according to different fields.
+      role: In this section you can create roles to use in the RBAC managed by abilities files, to define CRUD permissions and more.
+      permission: The predicate defines whether it is a permission to be able to do or not to do, the action is the type defines what can be done or not to be done, while the model defines on whom.
     
