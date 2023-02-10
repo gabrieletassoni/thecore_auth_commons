@@ -1,0 +1,47 @@
+it:
+  activerecord:
+    models:
+      user:
+        one: Utente
+        other: Utenti
+      role:
+        one: Ruolo
+        other: Ruoli
+      permission:
+        one: Permesso
+        other: Permessi
+    attributes:
+      user:
+        email: E-Mail
+        username: Nome Utente
+        code: Codice
+        roles: Ruoli
+        admin: Amministratore?
+        created_at: Data di Creazione
+        locked: Bloccato?
+        third_party: Ente Terzo?
+        password: Password
+        password_confirmation: Conferma Password
+      role:
+        users: Utenti
+        name: Ruolo
+        permissions: Permessi
+        created_at: Data di creazione
+        updated_at: Ultimo aggiornamento
+      permission:
+        predicate: Predicato
+        action: Azione
+        model: Modello
+    descriptions:
+      user: In questa sezione dell'applicazione potete cercare nella lista degli utenti in diversi modi usando i filtri o ordinare la lista secondo diversi campi.
+      role: In questa sezione si possono creare dei ruoli da usare nell'RBAC gestito dai file abilities, per definire le autorizzazioni CRUD e non solo.
+      permission: Il predicato definisce se è un permesso di poter fare o non fare, l'azione è il tipo definisce cosa si possa fare o non fare, mentre il modello definisce su chi.
+  permissions:
+    predicates:
+      can: Può
+      cannot: Non può
+    actions:
+      manage: Gestire
+      read: Leggere
+      update: Modificare
+      destroy: Eliminare

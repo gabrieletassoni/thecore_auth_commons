@@ -1,31 +1,28 @@
 $:.push File.expand_path("lib", __dir__)
 
-# Maintain your gem's version:
-require "thecore_auth_commons/version"
+require_relative "lib/thecore_auth_commons/version"
 
-# Describe your gem and declare its dependencies:
 Gem::Specification.new do |spec|
   spec.name        = "thecore_auth_commons"
   spec.version     = ThecoreAuthCommons::VERSION
   spec.authors     = ["Gabriele Tassoni"]
-  spec.email       = ["gabriele.tassoni@gmail.com"]
+  spec.email       = ["g.tassoni@bancolini.com"]
   spec.homepage    = "https://github.com/gabrieletassoni/thecore_auth_commons"
   spec.summary     = "Common Auth methods and models to be used in thecore components."
   spec.description = "Provides common User and Role models to attach Authentication and Authorization via your preferred gem."
-  spec.license     = "MIT"
-
-  # Prevent pushing this gem to RubyGems.org. To allow pushes either set the 'allowed_push_host'
+  
+  # Prevent pushing this gem to RubyGems.org. To allow pushes either set the "allowed_push_host"
   # to allow pushing to a single host or delete this section to allow pushing to any host.
-  if spec.respond_to?(:metadata)
-    spec.metadata["allowed_push_host"] = "https://rubygems.org"
-  else
-    raise "RubyGems 2.0 or newer is required to protect against " \
-      "public gem pushes."
+  spec.metadata["allowed_push_host"] = "https://rubygems.org"
+
+  spec.metadata["homepage_uri"] = spec.homepage
+  spec.metadata["source_code_uri"] = "https://github.com/gabrieletassoni/thecore_auth_commons"
+  spec.metadata["changelog_uri"] = "https://github.com/gabrieletassoni/thecore_auth_commons/blob/master/CHANGELOG.md"
+
+  spec.files = Dir.chdir(File.expand_path(__dir__)) do
+    Dir["{app,config,db,lib}/**/*", "MIT-LICENSE", "Rakefile", "README.md"]
   end
 
-  spec.files = Dir["{app,config,db,lib}/**/*", "MIT-LICENSE", "Rakefile", "README.md"]
-
-  spec.add_dependency "rails", "~> 7.0"
   # Authentication
   # https://github.com/heartcombo/devise
   spec.add_dependency 'devise', '~> 4.8'
@@ -39,9 +36,13 @@ Gem::Specification.new do |spec|
   # https://github.com/nulldb/nulldb
   spec.add_dependency 'activerecord-nulldb-adapter', '~> 0.7'
   
-  # https://github.com/take-five/activerecord-hierarchical_query
-  # Incompatible with pg higher than 1.4
-  # spec.add_dependency 'activerecord-hierarchical_query', '~> 1.4'
+  spec.add_dependency "thecore_settings", "~> 3.0"
 
+  # Testing
+  spec.add_development_dependency "simplecov", "~> 0.22"
+  spec.add_development_dependency "database_cleaner", "~> 2.0"
+  spec.add_development_dependency "factory_bot", "~> 6.2"
+  spec.add_development_dependency "rubocop", "~> 1.45"
+  spec.add_development_dependency "rubocop-rspec", "~> 2.18"
   spec.add_development_dependency "sqlite3", "~> 1.4"
 end

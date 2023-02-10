@@ -6,18 +6,9 @@ unless User.where(admin: true).exists?
     u = User.find_or_initialize_by(email: email)
     u.username = "Administrator" if u.respond_to? :username=
     u.password = u.password_confirmation = psswd
+    u.encrypted_access_token = User.new(:password => SecureRandom.uuid).encrypted_password
     u.admin = true
     u.save(validate: false)
-end
-
-# If there are previous users without the access_token, create it:
-User.all.each do |u|
-    if u.access_token.blank?
-        begin
-            u.access_token = SecureRandom.uuid #urlsafe_base64(32)
-        end while ::User.exists?(access_token: u.access_token)
-        u.save(validate: false)
-    end
 end
 
 @values = {
@@ -35,3 +26,6 @@ end
 fill :predicates
 fill :actions
 fill :targets
+
+ThecoreSettings::Setting.create(ns: :devise, key: :registerable, raw: "disable")
+ThecoreSettings::Setting.create(ns: :devise, key: :recoverable, raw: "disable")
