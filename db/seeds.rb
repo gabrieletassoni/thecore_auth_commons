@@ -26,6 +26,3 @@ end
 fill :predicates
 fill :actions
 fill :targets
-
-ThecoreSettings::Setting.create(ns: :devise, key: :registerable, raw: "disable")
-ThecoreSettings::Setting.create(ns: :devise, key: :recoverable, raw: "disable")
