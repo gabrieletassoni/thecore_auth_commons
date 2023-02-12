@@ -10,7 +10,6 @@ module ThecoreAuthCommonsUserConcern
     validates :password, presence: true, on: :create
     validates :password_confirmation, presence: true, on: :create
     validate :check_password_and_confirmation_equal
-    validates :access_token, uniqueness: true
     validates_each :admin do |record, attr, value|
       # Don't want admin == false if the current user is the only admin
       record.errors.add(attr, I18n.t("validation.errors.cannot_unadmin_last_admin")) if record.admin_changed? && record.admin_was == true && User.where(admin: true).count == 1

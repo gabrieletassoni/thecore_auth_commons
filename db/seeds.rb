@@ -6,7 +6,6 @@ unless User.where(admin: true).exists?
     u = User.find_or_initialize_by(email: email)
     u.username = "Administrator" if u.respond_to? :username=
     u.password = u.password_confirmation = psswd
-    u.encrypted_access_token = User.new(:password => SecureRandom.uuid).encrypted_password
     u.admin = true
     u.save(validate: false)
 end
