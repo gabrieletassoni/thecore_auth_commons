@@ -1,5 +1,5 @@
 puts "Loading ThecoreAuthCommons seeds"
-email = ENV["ADMIN_EMAIL"].presence || "admin@example.com"
+email = "admin@#{ENV["BASE_DOMAIN"]}"
 psswd = ENV["ADMIN_PASSWORD"].presence || "changeme"
 
 unless User.where(admin: true).exists?
