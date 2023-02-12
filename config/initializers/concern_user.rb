@@ -1,14 +1,7 @@
 module ThecoreAuthCommonsUserConcern
   extend ActiveSupport::Concern
 
-  included do            
-    before_validation on: :create do
-      # If the generated uuid is not already present, then create the user with the proposed uuid
-      # Otherwise, try to generate another one
-      begin
-          self.access_token = SecureRandom.uuid #urlsafe_base64(32)
-      end while ::User.exists?(access_token: self.access_token)
-    end
+  included do
     # REFERENCES
     has_many :role_users, dependent: :destroy, inverse_of: :user
     has_many :roles, through: :role_users, inverse_of: :users
