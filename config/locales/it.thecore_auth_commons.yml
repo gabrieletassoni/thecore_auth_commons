@@ -13,7 +13,6 @@ it:
     attributes:
       user:
         email: E-Mail
-        username: Nome Utente
         code: Codice
         roles: Ruoli
         admin: Amministratore?
