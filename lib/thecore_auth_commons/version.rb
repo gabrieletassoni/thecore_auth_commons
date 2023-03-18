@@ -1,5 +1,5 @@
-# frozen string_literal: true
+# frozen_string_literal: true
 
 module ThecoreAuthCommons
-  VERSION = "#{`git describe --tags --first-parent --abbrev=0`.chomp}"
+  VERSION = `git describe --tags --first-parent --abbrev=0`.chomp
 end
