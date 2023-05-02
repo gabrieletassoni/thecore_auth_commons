@@ -26,7 +26,7 @@ Gem::Specification.new do |spec|
           'public gem pushes.'
   end
 
-  spec.required_ruby_version = '>= 2.6.3'
+  spec.required_ruby_version = '>= 2.7.7'
 
   spec.files = Dir['{app,config,db,lib}/**/*', 'MIT-LICENSE', 'Rakefile', 'README.md']
 
@@ -46,8 +46,4 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency 'activerecord-hierarchical_query', '~> 1.3'
   spec.add_dependency 'activerecord-nulldb-adapter', '~> 0.7'
-
-  spec.add_development_dependency 'rubocop', '~> 1.48'
-  spec.add_development_dependency 'solargraph', '~> 0.48'
-  spec.add_development_dependency 'sqlite3', '~> 1.4'
 end
