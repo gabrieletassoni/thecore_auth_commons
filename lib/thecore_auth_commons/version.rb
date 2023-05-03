@@ -1,5 +1,5 @@
 # frozen_string_literal: true
 
 module ThecoreAuthCommons
-  VERSION = `git describe --tags --first-parent --abbrev=0`.chomp
+  VERSION = '2.4.1'
 end
