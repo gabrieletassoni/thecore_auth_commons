@@ -1,7 +1,11 @@
+# frozen_string_literal: true
+
 require 'test_helper'
 
-class ThecoreAuthCommons::Test < ActiveSupport::TestCase
-  test "truth" do
-    assert_kind_of Module, ThecoreAuthCommons
+module ThecoreAuthCommons
+  class Test < ActiveSupport::TestCase
+    def test_should_be_a_module
+      assert_kind_of Module, ThecoreAuthCommons
+    end
   end
 end
