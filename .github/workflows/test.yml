@@ -4,13 +4,12 @@
 
 name: Run Unit Tests
 
-on: push
-# TODO: reactivate if this workflow works
-#  pull_request:
-#    branches:
-#    - 'main'
-#    - 'develop'
-#    - 'release/**'
+on:
+  pull_request:
+    branches:
+    - 'main'
+    - 'develop'
+    - 'release/**'
 
 jobs:
   run-unit-tests-job:
