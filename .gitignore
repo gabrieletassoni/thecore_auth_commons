@@ -247,5 +247,5 @@ $RECYCLE.BIN/
 .passwords
 
 # Test files
-test/dummy/log/test.log
 test/dummy/db/test.sqlite3
+test/dummy/log/test.log
