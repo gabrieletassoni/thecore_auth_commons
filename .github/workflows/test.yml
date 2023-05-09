@@ -1,0 +1,36 @@
+# Github Actions
+
+# Jobs for testing Ruby On Rails application before accepting a Pull Request
+
+name: Run Unit Tests
+
+on:
+  pull_request:
+    branches:
+    - 'main'
+    - 'develop'
+    - 'release/**'
+
+jobs:
+  run-unit-tests-job:
+    name: 'Run Unit Tests'
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 'Checkout code'
+      uses: actions/checkout@v3
+
+    - name: 'Setup Ruby'
+      uses: ruby/setup-ruby@v1.144.2
+      with:
+        # runs 'bundle install' and caches installed gems automatically
+        bundler-cache: true
+        # ruby-version: (not needed with a .ruby-version file)
+
+    - name: 'Bundle'
+      run: |
+        bundle install
+
+    - name: 'Run Unit Tests'
+      run: |
+        bin/rails test

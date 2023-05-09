@@ -1,4 +1,4 @@
-# ThecoreAuth
+# Thecore Auth Commons
 Short description and motivation.
 
 ## Usage
@@ -22,7 +22,8 @@ $ gem install thecore_auth_commons
 ```
 
 ## Contributing
-Contribution directions go here.
+
+It's possible to (test using rbenv)[docs/testing-with-rbenv.md]
 
 ## License
 The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
