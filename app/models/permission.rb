@@ -14,7 +14,7 @@ class Permission < ApplicationRecord
     def display_name
         p = (I18n.t "permissions.predicates.#{predicate.name}", default: predicate.name.titleize rescue nil)
         a = (I18n.t "permissions.actions.#{action.name}", default: action.name.titleize rescue nil)
-        m = (I18n.t "activerecord.models.#{target.name}", default: target.name.titleize rescue nil)
+        m = (I18n.t "activerecord.models.#{target.name}", count: 2, default: target.name.titleize rescue nil)
         [ p, a, m ].join(" ")
     end
 end
