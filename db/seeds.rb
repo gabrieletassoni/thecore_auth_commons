@@ -12,7 +12,7 @@ end
 @values = {
     predicates: %i[can cannot],
     actions: %i[manage create read update destroy],
-    targets: ApplicationRecord.subclasses.map {|d| d.to_s.underscore}.to_a.unshift(:all)
+    targets: ApplicationRecord.subclasses.map {|d| d.to_s.underscore}.to_a.unshift("all")
 }
 
 def fill table
