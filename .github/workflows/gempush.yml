@@ -12,7 +12,7 @@ jobs:
     - run: |
         git fetch --unshallow --tags
         echo $?
-        # Check if the version already exists
+        # Check if the version already exists, if so, exit
         version=$(grep -oP 'VERSION = "\K[^"]+' lib/*/version.rb | awk -F'.' '{print $1"."$2"."$3}')
         if git tag --list | grep $version; then echo "Version already exists!"; exit 1; fi
     - uses: ruby/setup-ruby@v1
