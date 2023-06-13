@@ -15,7 +15,9 @@ jobs:
       id: check_version
       run: |
         version=$(grep -oP 'VERSION = "\K[^"]+' lib/*/version.rb | awk -F'.' '{print $1"."$2"."$3}')
-        if git rev-parse $version >/dev/null 2>&1
+        git fetch --unshallow --tags
+        echo $?
+        if git tag --list | grep -q $version;
         then
           echo "Version $version already exists"
           echo "version_exists=true" >> "$GITHUB_ENV"
