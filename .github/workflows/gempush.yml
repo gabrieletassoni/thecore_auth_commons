@@ -13,7 +13,8 @@ jobs:
         git fetch --unshallow --tags
         echo $?
         # Check if the version already exists
-        if git tag --list | grep $(grep -oP 'VERSION = "\K[^"]+' lib/*/version.rb); then echo "Version already exists!"; exit 1; fi
+        version=$(grep -oP 'VERSION = "\K[^"]+' lib/*/version.rb | awk -F'.' '{print $1"."$2"."$3}')
+        if git tag --list | grep $version; then echo "Version already exists!"; exit 1; fi
     - uses: ruby/setup-ruby@v1
       with:
         ruby-version: '3' # Not needed with a .ruby-version file
@@ -22,7 +23,8 @@ jobs:
     - run: |
         git config --local user.email "noreply@alchemic.it"
         git config --local user.name "AlchemicIT"
-        git tag -a $(grep -oP 'VERSION = "\K[^"]+' lib/*/version.rb) -m "Version $(grep -oP 'VERSION = "\K[^"]+' lib/*/version.rb)"
+        version=$(grep -oP 'VERSION = "\K[^"]+' lib/*/version.rb | awk -F'.' '{print $1"."$2"."$3}')
+        git tag -a $version -m "Version $version"
         git push --tags
         
     - name: Publish to RubyGems
