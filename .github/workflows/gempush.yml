@@ -9,12 +9,15 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - run: |
-        git fetch --unshallow --tags
-        echo $?
-        # Check if the version already exists, if so, exit
+    # Check the version if it already exists as a tag, if so, exit, stop subsequent steps without failing the job
+    - name: Check if tag exists
+      run: |
         version=$(grep -oP 'VERSION = "\K[^"]+' lib/*/version.rb | awk -F'.' '{print $1"."$2"."$3}')
-        if git tag --list | grep $version; then echo "Version already exists!"; exit 1; fi
+        if git rev-parse $version >/dev/null 2>&1
+        then
+          echo "Tag $version already exists, exiting"
+          exit 0
+        fi
     - uses: ruby/setup-ruby@v1
       with:
         ruby-version: '3' # Not needed with a .ruby-version file
