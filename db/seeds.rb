@@ -1,4 +1,8 @@
 puts "Loading ThecoreAuthCommons seeds"
+
+# Need this since in the rake task is not aeger loaded
+Zeitwerk::Loader.eager_load_all
+
 email = "admin@#{ENV["BASE_DOMAIN"].presence || "example.com"}"
 psswd = ENV["ADMIN_PASSWORD"].presence || "changeme"
 
