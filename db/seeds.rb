@@ -18,7 +18,11 @@ end
 def fill table
     model = table.to_s.classify.constantize
     model.reset_column_information
-    model.upsert_all @values[table].map { |p| {name: p, created_at: Time.now, updated_at: Time.now} }, unique_by: [:name]
+    puts " - Filling table #{table} with #{@values[table].count} elements:"
+    @values[table].each do |name|
+        puts "   - Name: #{name}"
+        model.find_or_create_by name: name
+    end
 end
 
 fill :predicates
