@@ -1,9 +1,6 @@
 name: Ruby Gem
 
-on:
-  push:
-    tags:
-      - '*'
+on: push
 
 jobs:
   build:
@@ -15,12 +12,19 @@ jobs:
     - run: |
         git fetch --unshallow --tags
         echo $?
-        git tag --list
+        # Check if the version already exists
+        if git tag --list | grep $(grep -oP 'VERSION = "\K[^"]+' lib/*/version.rb); then echo "Version already exists!"; exit 1; fi
     - uses: ruby/setup-ruby@v1
       with:
         ruby-version: '3' # Not needed with a .ruby-version file
         bundler-cache: true # runs 'bundle install' and caches installed gems automatically
-
+    # sets the git tag to the same version as the gem
+    - run: |
+        git config --local user.email "noreply@alchemic.it"
+        git config --local user.name "AlchemicIT"
+        git tag -a $(grep -oP 'VERSION = "\K[^"]+' lib/*/version.rb) -m "Version $(grep -oP 'VERSION = "\K[^"]+' lib/*/version.rb)"
+        git push --tags
+        
     - name: Publish to RubyGems
       run: |
         mkdir -p $HOME/.gem
