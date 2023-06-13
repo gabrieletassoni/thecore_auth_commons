@@ -16,19 +16,19 @@ jobs:
         version=$(grep -oP 'VERSION = "\K[^"]+' lib/*/version.rb | awk -F'.' '{print $1"."$2"."$3}')
         if git rev-parse $version >/dev/null 2>&1
         then
-          echo "::set-output name=exists::true"
+          echo "exists=true" >> $GITHUB_OUTPUT
         else
-          echo "::set-output name=exists::false"
+          echo "exists=false" >> $GITHUB_OUTPUT
         fi
     # If the version already exists, skip the next steps
     - uses: ruby/setup-ruby@v1
-      if: steps.check_version.outputs.exists == 'false'
+      if: env.exists == 'false'
       with:
         ruby-version: '3' # Not needed with a .ruby-version file
         bundler-cache: true # runs 'bundle install' and caches installed gems automatically
     # sets the git tag to the same version as the gem
     - name: Set git tag
-      if: steps.check_version.outputs.exists == 'false'
+      if: env.exists == 'false'
       run: |
         git config --local user.email "noreply@alchemic.it"
         git config --local user.name "AlchemicIT"
@@ -37,7 +37,7 @@ jobs:
         git push --tags
         
     - name: Publish to RubyGems
-      if: steps.check_version.outputs.exists == 'false'
+      if: env.exists == 'false'
       run: |
         mkdir -p $HOME/.gem
         touch $HOME/.gem/credentials
