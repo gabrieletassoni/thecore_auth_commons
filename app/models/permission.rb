@@ -12,9 +12,9 @@ class Permission < ApplicationRecord
     validates :target_id, presence: true
 
     def display_name
-        p = (I18n.t "permissions.predicates.#{predicate.name}", default: predicate.name.titleize rescue nil)
+        pr = (I18n.t "permissions.predicates.#{predicate.name}", default: predicate.name.titleize rescue nil)
         a = (I18n.t "permissions.actions.#{action.name}", default: action.name.titleize rescue nil)
         m = (I18n.t "activerecord.models.#{target.name}", count: 2, default: target.name.titleize rescue nil)
-        [ p, a, m ].join(" ")
+        [ pr, a, m ].join(" ")
     end
 end
