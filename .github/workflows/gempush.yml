@@ -17,10 +17,10 @@ jobs:
         if git rev-parse $version >/dev/null 2>&1
         then
           echo "Version $version already exists"
-          echo "version_exists=true" >> $GITHUB_OUTPUT
+          echo "version_exists=true" >> "$GITHUB_ENV"
         else
           echo "Version $version does not exist"
-          echo "version_exists=false" >> $GITHUB_OUTPUT
+          echo "version_exists=false" >> "$GITHUB_ENV"
         fi
     # If the version already exists, skip the next steps
     - uses: ruby/setup-ruby@v1
