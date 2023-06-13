@@ -9,21 +9,27 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    # Check the version if it already exists as a tag, if so, exit, stop subsequent steps without failing the job
-    - name: Check if tag exists
+    # Check the version if it already exists as a tag, if so set a variable to use as a condition in order to skip next steps without failing the job
+    - name: Check if version already exists
+      id: check_version
       run: |
         version=$(grep -oP 'VERSION = "\K[^"]+' lib/*/version.rb | awk -F'.' '{print $1"."$2"."$3}')
         if git rev-parse $version >/dev/null 2>&1
         then
-          echo "Tag $version already exists, exiting"
-          exit 0
+          echo "::set-output name=exists::true"
+        else
+          echo "::set-output name=exists::false"
         fi
+    # If the version already exists, skip the next steps
     - uses: ruby/setup-ruby@v1
+      if: steps.check_version.outputs.exists == 'false'
       with:
         ruby-version: '3' # Not needed with a .ruby-version file
         bundler-cache: true # runs 'bundle install' and caches installed gems automatically
     # sets the git tag to the same version as the gem
-    - run: |
+    - name: Set git tag
+      if: steps.check_version.outputs.exists == 'false'
+      run: |
         git config --local user.email "noreply@alchemic.it"
         git config --local user.name "AlchemicIT"
         version=$(grep -oP 'VERSION = "\K[^"]+' lib/*/version.rb | awk -F'.' '{print $1"."$2"."$3}')
@@ -31,6 +37,7 @@ jobs:
         git push --tags
         
     - name: Publish to RubyGems
+      if: steps.check_version.outputs.exists == 'false'
       run: |
         mkdir -p $HOME/.gem
         touch $HOME/.gem/credentials
