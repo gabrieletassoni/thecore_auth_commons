@@ -9,7 +9,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    # Check the version if it already exists as a tag, if so set a variable to use as a condition in order to skip next steps without failing the job
+    # Check the version if it already exists as a tag, if so set a variable to use as a condition in order 
+    # to skip next steps without failing the job, using Env File to store the variable
     - name: Check if version already exists
       id: check_version
       run: |
