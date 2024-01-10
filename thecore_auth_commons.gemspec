@@ -34,7 +34,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'kaminari', "~> 1.2"
 
   # https://github.com/nulldb/nulldb
-  spec.add_dependency 'activerecord-nulldb-adapter', '~> 0.7'
+  spec.add_dependency 'activerecord-nulldb-adapter', '~> 1.0'
   
   spec.add_dependency "thecore_settings", "~> 3.0"
 
