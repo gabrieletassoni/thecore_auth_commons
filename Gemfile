@@ -17,6 +17,6 @@ gem 'cancancan', '~> 3.4'
 gem 'kaminari', "~> 1.2"
 
 # https://github.com/nulldb/nulldb
-gem 'activerecord-nulldb-adapter', '~> 0.7'
+gem 'activerecord-nulldb-adapter', '~> 1.0'
 # Start debugger with binding.b [https://github.com/ruby/debug]
 # gem "debug", ">= 1.0.0"
