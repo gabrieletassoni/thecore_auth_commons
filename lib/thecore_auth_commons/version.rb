@@ -1,3 +1,3 @@
 module ThecoreAuthCommons
-  VERSION = "3.1.7".freeze
+  VERSION = "3.2.1".freeze
 end
