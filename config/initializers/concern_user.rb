@@ -10,6 +10,10 @@ module ThecoreAuthCommonsUserConcern
     validates :password, presence: true, on: :create
     validates :password_confirmation, presence: true, on: :create
     validate :check_password_and_confirmation_equal
+    validates_each :password do |record, attr, value|
+      # Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character or be blank
+      record.errors.add(attr, I18n.t("validation.errors.password_must_contain_uppercase_lowercase_number_special_character")) unless value.blank? || (value =~ /[A-Z]/ && value =~ /[a-z]/ && value =~ /[0-9]/ && value =~ /[^A-Za-z0-9]/)
+    end
     validates_each :admin do |record, attr, value|
       # Don't want admin == false if the current user is the only admin
       record.errors.add(attr, I18n.t("validation.errors.cannot_unadmin_last_admin")) if record.admin_changed? && record.admin_was == true && User.where(admin: true).count == 1

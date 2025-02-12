@@ -1,4 +1,15 @@
 it:
+  error:
+    messages:
+      password_requires_letters_and_numbers: "deve contenere almeno una lettera e un numero"
+      password_requires_special_characters: "deve contenere almeno un carattere speciale"
+  validation:
+    errors:
+      password_must_contain_uppercase_lowercase_number_special_character: "deve contenere almeno una lettera maiuscola, una lettera minuscola, un numero e un carattere speciale"
+      cannot_unadmin_last_admin: "almeno un utente deve essere un amministratore"
+      cannot_unlock_last_admin: "almeno un utente deve essere sbloccato"
+      cannot_delete_last_admin: "almeno un utente deve essere un amministratore"
+      cannot_delete_last_role: "deve esistere almeno un ruolo"
   activerecord:
     models:
       user:

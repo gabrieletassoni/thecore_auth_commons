@@ -36,7 +36,7 @@ Gem::Specification.new do |spec|
   # https://github.com/nulldb/nulldb
   spec.add_dependency 'activerecord-nulldb-adapter', '~> 1.0'
   
-  spec.add_dependency "thecore_settings", "~> 3.0"
+  spec.add_dependency "thecore_settings", "~> 3.0", "> 3.0.5"
 
   # Testing
   spec.add_development_dependency "simplecov", "~> 0.22"

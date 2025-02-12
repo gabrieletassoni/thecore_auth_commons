@@ -4,7 +4,7 @@ puts "Loading ThecoreAuthCommons seeds"
 Zeitwerk::Loader.eager_load_all
 
 email = "admin@#{ENV["BASE_DOMAIN"].presence || "example.com"}"
-psswd = ENV["ADMIN_PASSWORD"].presence || "changeme"
+psswd = ENV["ADMIN_PASSWORD"].presence || "Change#1"
 
 unless User.where(admin: true).exists?
     u = User.find_or_initialize_by(email: email)
