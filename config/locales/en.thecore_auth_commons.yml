@@ -5,6 +5,7 @@ en:
       password_requires_special_characters: "must contain at least one special character"
   validation:
     errors:
+      password_and_confirm_must_be_the_same: "passwords must be the same"
       password_must_contain_uppercase_lowercase_number_special_character: "must contain at least one uppercase letter, one lowercase letter, one number and one special character"
       cannot_unadmin_last_admin: "at least one user must be an administrator"
       cannot_unlock_last_admin: "at least one user must be unlocked"
