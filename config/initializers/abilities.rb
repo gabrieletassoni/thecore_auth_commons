@@ -9,6 +9,7 @@ module Abilities
                 if user.admin?
                     # Admins' abiities
                     can :manage, :all # only allow admin users to access Rails Admin
+                    cannot :create, ::Action
                     # prevents killing himself
                     cannot :destroy, ::User do |u| 
                         u.id == user.id
