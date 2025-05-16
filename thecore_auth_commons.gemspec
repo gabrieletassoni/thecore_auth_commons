@@ -23,6 +23,7 @@ Gem::Specification.new do |spec|
     Dir["{app,config,db,lib}/**/*", "MIT-LICENSE", "Rakefile", "README.md"]
   end
 
+  spec.add_dependency "net-ldap"
   # Authentication
   # https://github.com/heartcombo/devise
   spec.add_dependency 'devise', '~> 4.8'

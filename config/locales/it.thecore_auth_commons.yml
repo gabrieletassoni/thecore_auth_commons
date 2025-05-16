@@ -13,6 +13,9 @@ it:
       cannot_delete_last_role: "deve esistere almeno un ruolo"
   activerecord:
     models:
+      ldap_server:
+        one: Server LDAP
+        other: Server LDAP
       user:
         one: Utente
         other: Utenti
@@ -23,6 +26,23 @@ it:
         one: Permesso
         other: Permessi
     attributes:
+      ldap_server:
+        # t.string :host, null: false
+        # t.integer :port, default: 389
+        # t.string :base_dn, null: false
+        # t.string :admin_user
+        # t.string :admin_password
+        # t.integer :priority, default: 1
+        # t.boolean :use_ssl, default: false
+        # t.string :auth_field, default: "userPrincipalName"
+        host: Host
+        port: Porta
+        base_dn: Base DN
+        admin_user: Utente Amministratore
+        admin_password: Password Amministratore
+        priority: Priorità
+        use_ssl: Usa SSL?
+        auth_field: Campo di Autenticazione
       user:
         email: E-Mail
         code: Codice
