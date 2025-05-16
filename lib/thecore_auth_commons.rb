@@ -58,7 +58,7 @@ module ThecoreAuthCommons
     user.auth_source = "ldap #{server_id}"
 
     # Password don't need to be changed, just created, otherwise it will invalidate the current user session if it's logged in
-    user.password = user.password_confirmation = Devise.friendly_token[0, 20] if user.new_record?
+    user.password = user.password_confirmation = ThecoreAuthCommons.generate_secure_password if user.new_record?
 
     # Eventuale mapping LDAP -> campi User
     user.name = entry[:givenname]&.first if user.respond_to?(:name)
@@ -79,4 +79,30 @@ module ThecoreAuthCommons
     puts "Cannot save user #{email} with errors: #{user.errors.full_messages.join(", ")}" unless user.save # if user.new_record? || user.changed? || user.roles_changed?
     user
   end
+
+  def self.generate_secure_password(length = 20)
+    raise ArgumentError, 'Length must be at least 4' if length < 4
+
+    # Caratteri da cui attingere
+    lowercase = ('a'..'z').to_a
+    uppercase = ('A'..'Z').to_a
+    numbers   = ('0'..'9').to_a
+    symbols   = ['!', '@', '#', '$', '%', '&', '*', '?', '-', '_', '+', '=']
+
+    # Obbliga almeno un carattere da ogni gruppo
+    password = [
+      lowercase.sample,
+      uppercase.sample,
+      numbers.sample,
+      symbols.sample
+    ]
+
+    # Caratteri restanti scelti a caso tra tutti
+    all_characters = lowercase + uppercase + numbers + symbols
+    (length - 4).times { password << all_characters.sample }
+
+    # Mischia per evitare ordine prevedibile
+    password.shuffle.join
+  end
+
 end
