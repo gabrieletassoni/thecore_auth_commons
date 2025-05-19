@@ -68,7 +68,7 @@ module ThecoreAuthCommons
     entry[:memberOf].each do |group|
       group_name = group.split(",").first.split("=").last
       # Se il gruppo è un admin, assegna il ruolo admin
-      is_admin = true if [ "Administrators" "Domain Admins", "Schema Admins", "Enterprise Admins", "admins", "administrators" ].include?(group_name)
+      is_admin = true if [ "Administrators", "Domain Admins", "Schema Admins", "Enterprise Admins", "admins", "administrators" ].include?(group_name)
       
       role = Role.find_or_create_by(name: group_name)
       user.roles << role unless user.roles.include?(role)
