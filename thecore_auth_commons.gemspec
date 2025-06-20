@@ -25,6 +25,10 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "net-ldap"
   # Authentication
+  spec.add_dependency 'omniauth', '~> 2.1'
+  spec.add_dependency 'omniauth-google-oauth2', "~> 1.2"
+  spec.add_dependency 'omniauth-entra-id', "~> 3.0"
+  
   # https://github.com/heartcombo/devise
   spec.add_dependency 'devise', '~> 4.8'
   # Authorization

@@ -4,6 +4,9 @@ require 'kaminari'
 require 'activerecord-nulldb-adapter'
 require "thecore_settings"
 require "net/ldap"
+require 'omniauth'
+require 'omniauth-google-oauth2'
+require 'omniauth-entra-id'
 
 require "thecore_auth_commons/engine"
 
