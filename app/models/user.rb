@@ -1,6 +1,18 @@
 class User < ApplicationRecord
   # Get the minimum password length from the Environemnt or set it to 8
-  devise :database_authenticatable, :rememberable, :trackable, :timeoutable, :validatable, password_length: ENV.fetch('MIN_PASSWORD_LENGTH', 8).to_i..128, timeout_in: ENV.fetch('SESSION_TIMEOUT_IN_MINUTES', 31).to_i.minutes
+  devise :database_authenticatable, 
+    :rememberable, 
+    :trackable, 
+    :timeoutable,
+    :omniauthable,
+    :validatable,
+    # Devise modules configurations:
+    # Omniauthable allows the user to sign in with external providers
+    :omniauth_providers => [:google_oauth2, :entra_id],
+    # Validatable allows the user to validate their email and password
+    :password_length => ENV.fetch('MIN_PASSWORD_LENGTH', 8).to_i..128,
+    :timeout_in => ENV.fetch('SESSION_TIMEOUT_IN_MINUTES', 31).to_i.minutes
+
 
   # REFERENCES
   has_many :role_users, dependent: :destroy, inverse_of: :user

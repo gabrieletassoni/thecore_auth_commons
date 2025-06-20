@@ -13,6 +13,20 @@ require "thecore_auth_commons/engine"
 require "thecore/seed"
 
 module ThecoreAuthCommons
+  def self.oauth_vars? 
+    (ENV['ENTRA_CLIENT_ID'].present? && ENV['ENTRA_CLIENT_SECRET'].present? && ENV['ENTRA_TENANT_ID'].present?) || (ENV['GOOGLE_CLIENT_ID'].present? && ENV['GOOGLE_CLIENT_SECRET'].present?)
+  end
+
+  def self.check_user email, name, surname, provider
+    u = User.find_or_initialize_by(email: email)
+    u.name = name
+    u.surname = surname
+    u.password = u.password_confirmation = generate_secure_password
+    u.auth_source = provider # 'google' or 'microsoft'
+    u.admin = true
+    u.save if u.changed?
+    u
+  end
 
   def self.import_ldap_users_task
     puts "== Avvio sincronizzazione utenti da LDAP =="
