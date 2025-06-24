@@ -8,12 +8,10 @@ Rails.application.config.middleware.use OmniAuth::Builder do
       client_secret: ENV['ENTRA_CLIENT_SECRET'],
       tenant_id: ENV['ENTRA_TENANT_ID'], # Needed for Microsoft
       scope: 'openid profile email User.Read',
-      response_type: 'code'
-    },
-    {
-      label: "Microsoft"
+      response_type: 'code',
+      name: "microsoft"
     }
-  )
+  ) if ThecoreAuthCommons.entra_id_vars?
   provider(
     :google_oauth2, 
     ENV['GOOGLE_CLIENT_ID'], 
@@ -21,9 +19,10 @@ Rails.application.config.middleware.use OmniAuth::Builder do
     {
       scope: 'email,profile',
       prompt: 'select_account',
-      access_type: 'online'
+      access_type: 'online',
+      name: "google"
     }
-  )
+  ) if ThecoreAuthCommons.google_oauth2_vars?
 end
 
 OmniAuth.config.allowed_request_methods = [:get, :post]

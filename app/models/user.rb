@@ -8,7 +8,10 @@ class User < ApplicationRecord
     :validatable,
     # Devise modules configurations:
     # Omniauthable allows the user to sign in with external providers
-    :omniauth_providers => [:google_oauth2, :entra_id],
+    :omniauth_providers => [
+      ThecoreAuthCommons.entra_id_vars? && 'microsoft',
+      ThecoreAuthCommons.google_oauth2_vars? && 'google'
+    ].select(&:itself).compact,
     # Validatable allows the user to validate their email and password
     :password_length => ENV.fetch('MIN_PASSWORD_LENGTH', 8).to_i..128,
     :timeout_in => ENV.fetch('SESSION_TIMEOUT_IN_MINUTES', 31).to_i.minutes

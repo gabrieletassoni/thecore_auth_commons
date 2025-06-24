@@ -1,10 +1,10 @@
 # app/controllers/users/omniauth_callbacks_controller.rb
 class Users::OmniauthCallbacksController < Devise::OmniauthCallbacksController
-  def google_oauth2
+  def google
     callback 'Google', from_params, 'google'
   end
 
-  def entra_id
+  def microsoft
     callback 'Microsoft Entra ID', from_params, 'entra_id'
   end
 

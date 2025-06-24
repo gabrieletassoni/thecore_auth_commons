@@ -14,8 +14,19 @@ require "thecore/seed"
 
 module ThecoreAuthCommons
   def self.oauth_vars? 
-    (ENV['ENTRA_CLIENT_ID'].present? && ENV['ENTRA_CLIENT_SECRET'].present? && ENV['ENTRA_TENANT_ID'].present?) || (ENV['GOOGLE_CLIENT_ID'].present? && ENV['GOOGLE_CLIENT_SECRET'].present?)
+     entra_id_vars? || google_oauth2_vars?
   end
+
+  def self.entra_id_vars?
+    ENV['ENTRA_CLIENT_ID'].present? && ENV['ENTRA_CLIENT_SECRET'].present? && ENV['ENTRA_TENANT_ID'].present?
+  end
+
+  def self.google_oauth2_vars?
+    ENV['GOOGLE_CLIENT_ID'].present? && ENV['GOOGLE_CLIENT_SECRET'].present?
+  end
+
+  # Controlla se l'utente esiste, altrimenti lo crea con una password casuale
+  # e lo restituisce. Se l'utente esiste già, lo restituisce senza modificarlo.
 
   def self.check_user email, name, surname, provider
     u = User.find_or_initialize_by(email: email)
