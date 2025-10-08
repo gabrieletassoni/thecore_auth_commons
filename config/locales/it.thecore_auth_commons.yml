@@ -53,6 +53,7 @@ it:
         third_party: Ente Terzo?
         password: Password
         password_confirmation: Conferma Password
+        auth_source: Autenticazione
       role:
         users: Utenti
         name: Ruolo
