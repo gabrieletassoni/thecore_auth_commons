@@ -104,7 +104,7 @@ module ThecoreAuthCommons
 
     user.admin = is_admin if user.respond_to?(:admin)
     # Se l'utente è nuovo o ha cambiato qualcosa, salvalo
-    puts "Cannot save user #{email} with errors: #{user.errors.full_messages.join(", ")}" unless user.save # if user.new_record? || user.changed? || user.roles_changed?
+    puts "Cannot save user #{email} with errors: #{user.errors.full_messages.join(", ")}" unless user.save(:validate => false) # if user.new_record? || user.changed? || user.roles_changed?
     user
   end
 
