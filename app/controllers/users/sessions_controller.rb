@@ -4,19 +4,20 @@ class Users::SessionsController < Devise::SessionsController
     self.resource = warden.authenticate(auth_options)
 
     if resource
+      Rails.logger.info("Authentication: Found local user, signing in")
       sign_in_and_redirect(resource)
     else
+      Rails.logger.info("Authentication: Not found a local user, trying LDAP")
       user = Ldap::Authenticator.new(
         email: params[:user][:email],
-        password: params[:user][:password]
+        password: params[:user][:password],
       ).authenticate
 
       if user
-        flash[:notice] = "Autenticato via LDAP"
-        sign_in(:user, user)
-        redirect_to after_sign_in_path_for(user)
+        sign_in_and_redirect(user)
       else
-        flash.now[:alert] = "Email o password non validi"
+        set_flash_message!(:alert, :invalid)
+
         self.resource = resource_class.new(sign_in_params)
         clean_up_passwords(resource)
         respond_with_navigational(resource) { render :new, status: :unauthorized }

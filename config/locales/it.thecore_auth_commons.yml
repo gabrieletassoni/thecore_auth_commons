@@ -1,4 +1,9 @@
 it:
+  devise:
+    sessions:
+      invalid: "Credenziali %{authentication_keys} o password non valide."
+      user:
+        invalid: "Credenziali %{authentication_keys} o password non valide."
   error:
     messages:
       password_requires_letters_and_numbers: "deve contenere almeno una lettera e un numero"

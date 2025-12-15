@@ -1,4 +1,9 @@
 en:
+  devise:
+    sessions:
+      invalid: "Credential or password are invalid."
+      user:
+        invalid: "Credential or password are invalid."
   error:
     messages:
       password_requires_letters_and_numbers: "must contain at least one letter and one number"
