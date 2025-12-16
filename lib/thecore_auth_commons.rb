@@ -73,25 +73,28 @@ module ThecoreAuthCommons
         puts "Importando utente: #{email}"
 
         # Password must contain at least one uppercase letter, one lowercase letter, one number and one special character
-        ThecoreAuthCommons.align_user email, entry, server.id
+        ThecoreAuthCommons.align_user email, entry, server
         imported_count += 1
       end
     end
 
     puts "== Completato. Utenti importati: #{imported_count} =="
   end
-  # Your code goes here...
-  def self.align_user(email, entry, server_id)
+
+  def self.align_user(email, entry, server)
     user = User.find_or_initialize_by(email: email)
-    user.auth_source = "ldap #{server_id}"
+    user.auth_source = "ldap #{server.id}"
 
     # Password don't need to be changed, just created, otherwise it will invalidate the current user session if it's logged in
     user.password = user.password_confirmation = ThecoreAuthCommons.generate_secure_password if user.new_record?
 
     # Eventuale mapping LDAP -> campi User
-    user.name = entry[:givenname]&.first if user.respond_to?(:name)
+    user.name = entry[server.name]&.first if user.respond_to?(:name) && server.name.present?
+    user.surname = entry[server.surname]&.first if user.respond_to?(:surname) && server.surname.present?
+    user.phone = entry[server.phone]&.first if user.respond_to?(:phone) && server.phone.present?
+    user.code = entry[server.code]&.first if user.respond_to?(:code) && server.code.present?
 
-    # Recupera dala entry i gruppi di cui fa parte l'utente e crea i relativi record in Role assegnandoli all'utente corrente
+    # Recupera dalla entry i gruppi di cui fa parte l'utente e crea i relativi record in Role assegnandoli all'utente corrente
     is_admin = false
     entry[:memberOf].each do |group|
       group_name = group.split(",").first.split("=").last

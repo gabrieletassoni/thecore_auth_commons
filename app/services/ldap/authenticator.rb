@@ -53,7 +53,7 @@ module Ldap
         entry = auth_on_single_server(server)
         if entry
           Rails.logger.info("Authentication: LDAP authentication succeeded for #{email} on server #{server.name}")
-          return find_or_create_user(entry, server.id)
+          return find_or_create_user(entry, server)
         else
           Rails.logger.info("Authentication: LDAP authentication failed for #{email} on server #{server.name}")
         end
@@ -66,8 +66,8 @@ module Ldap
 
     attr_reader :email, :password
 
-    def find_or_create_user(entry, server_id)
-      ThecoreAuthCommons.align_user email, entry, server_id
+    def find_or_create_user(entry, server)
+      ThecoreAuthCommons.align_user email, entry, server
     end
   end
 end
