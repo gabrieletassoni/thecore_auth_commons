@@ -16,7 +16,7 @@ class Users::SessionsController < Devise::SessionsController
       if user
         sign_in_and_redirect(user)
       else
-        set_flash_message!(:alert, :invalid)
+        set_flash_message!(:alert, :invalid, authentication_keys: resource_class.authentication_keys.join(", "))
 
         self.resource = resource_class.new(sign_in_params)
         clean_up_passwords(resource)
