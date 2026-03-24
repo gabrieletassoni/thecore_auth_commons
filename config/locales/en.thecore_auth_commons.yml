@@ -1,23 +1,26 @@
 en:
   devise:
     sessions:
-      invalid: "Credential or password are invalid."
+      invalid: "Invalid credentials or password."
       user:
-        invalid: "Credential or password are invalid."
+        invalid: "Invalid credentials or password."
   error:
     messages:
       password_requires_letters_and_numbers: "must contain at least one letter and one number"
       password_requires_special_characters: "must contain at least one special character"
   validation:
     errors:
-      password_and_confirm_must_be_the_same: "passwords must be the same"
+      password_and_confirm_must_be_the_same: "passwords must match"
       password_must_contain_uppercase_lowercase_number_special_character: "must contain at least one uppercase letter, one lowercase letter, one number and one special character"
       cannot_unadmin_last_admin: "at least one user must be an administrator"
-      cannot_unlock_last_admin: "at least one user must be unlocked"
+      cannot_unlock_last_admin: "at least one user must remain unlocked"
       cannot_delete_last_admin: "at least one user must be an administrator"
       cannot_delete_last_role: "at least one role must exist"
   activerecord:
     models:
+      ldap_server:
+        one: LDAP Server
+        other: LDAP Servers
       user:
         one: User
         other: Users
@@ -28,30 +31,40 @@ en:
         one: Permission
         other: Permissions
     attributes:
+      ldap_server:
+        host: Host
+        port: Port
+        base_dn: Base DN
+        admin_user: Admin User
+        admin_password: Admin Password
+        priority: Priority
+        use_ssl: Use SSL?
+        auth_field: Authentication Field
       user:
         email: Email
         code: Code
         roles: Roles
         admin: Administrator?
-        created_at: Creation Date
+        created_at: Created On
         locked: Locked?
         third_party: Third Party?
         password: Password
         password_confirmation: Confirm Password
+        auth_source: Authentication Source
       role:
         users: Users
         name: Role
         permissions: Permissions
-        created_at: Creation Date
-        updated_at: Last Update
+        created_at: Created On
+        updated_at: Last Updated
       permission:
         predicate: Predicate
         action: Action
         model: Model
     descriptions:
-      user: In this section of the application, you can search the list of users in different ways using filters or sort the list by various fields.
-      role: In this section, you can create roles to use in the RBAC managed by the abilities files, to define CRUD and other permissions.
-      permission: The predicate defines whether it is a permission to do or not do something, the action defines what can or cannot be done, while the model defines on whom.
+      user: In this section you can search and filter the list of users, or sort it by various fields.
+      role: In this section you can create roles for the RBAC system managed by the abilities files, to define CRUD and other permissions.
+      permission: The predicate defines whether it is a permission to allow or deny an action; the action defines what can or cannot be done; the model defines the resource it applies to.
   permissions:
     predicates:
       can: Can
