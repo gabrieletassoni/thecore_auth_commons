@@ -30,6 +30,21 @@ it:
       permission:
         one: Permesso
         other: Permessi
+      action:
+        one: Azione
+        other: Azioni
+      predicate:
+        one: Predicato
+        other: Predicati
+      target:
+        one: Obiettivo
+        other: Obiettivi
+      permission_role:
+        one: Ruolo del Permesso
+        other: Ruoli del Permesso
+      role_user:
+        one: Utente del Ruolo
+        other: Utenti del Ruolo
     attributes:
       ldap_server:
         # t.string :host, null: false
@@ -69,6 +84,28 @@ it:
         predicate: Predicato
         action: Azione
         model: Modello
+      action:
+        name: Nome
+        created_at: Data di Creazione
+        updated_at: Data di Aggiornamento
+      predicate:
+        name: Nome
+        created_at: Data di Creazione
+        updated_at: Data di Aggiornamento
+      target:
+        name: Nome
+        created_at: Data di Creazione
+        updated_at: Data di Aggiornamento
+      permission_role:
+        role: Ruolo
+        permission: Permesso
+        created_at: Data di Creazione
+        updated_at: Data di Aggiornamento
+      role_user:
+        role: Ruolo
+        user: Utente
+        created_at: Data di Creazione
+        updated_at: Data di Aggiornamento
     descriptions:
       user: In questa sezione dell'applicazione potete cercare nella lista degli utenti in diversi modi usando i filtri o ordinare la lista secondo diversi campi.
       role: In questa sezione si possono creare dei ruoli da usare nell'RBAC gestito dai file abilities, per definire le autorizzazioni CRUD e non solo.

@@ -30,6 +30,21 @@ en:
       permission:
         one: Permission
         other: Permissions
+      action:
+        one: Action
+        other: Actions
+      predicate:
+        one: Predicate
+        other: Predicates
+      target:
+        one: Target
+        other: Targets
+      permission_role:
+        one: Permission Role
+        other: Permission Roles
+      role_user:
+        one: Role User
+        other: Role Users
     attributes:
       ldap_server:
         host: Host
@@ -61,6 +76,28 @@ en:
         predicate: Predicate
         action: Action
         model: Model
+      action:
+        name: Name
+        created_at: Created On
+        updated_at: Updated On
+      predicate:
+        name: Name
+        created_at: Created On
+        updated_at: Updated On
+      target:
+        name: Name
+        created_at: Created On
+        updated_at: Updated On
+      permission_role:
+        role: Role
+        permission: Permission
+        created_at: Created On
+        updated_at: Updated On
+      role_user:
+        role: Role
+        user: User
+        created_at: Created On
+        updated_at: Updated On
     descriptions:
       user: In this section you can search and filter the list of users, or sort it by various fields.
       role: In this section you can create roles for the RBAC system managed by the abilities files, to define CRUD and other permissions.
