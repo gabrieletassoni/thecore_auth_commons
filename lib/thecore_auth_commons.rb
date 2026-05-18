@@ -105,7 +105,7 @@ module ThecoreAuthCommons
       user.roles << role unless user.roles.include?(role)
     end
 
-    user.admin = is_admin if user.respond_to?(:admin)
+    user.admin = is_admin if user.respond_to?(:admin) && !user.admin # Se l'utente è già admin non revocargli l'admin, altrimenti se è nuovo o non era admin assegnagli l'admin se è presente nei gruppi admin
     # Se l'utente è nuovo o ha cambiato qualcosa, salvalo
     puts "Cannot save user #{email} with errors: #{user.errors.full_messages.join(", ")}" unless user.save(:validate => false) # if user.new_record? || user.changed? || user.roles_changed?
     user

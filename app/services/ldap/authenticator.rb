@@ -57,10 +57,10 @@ module Ldap
       LdapServer.all.each do |server|
         entry = auth_on_single_server(server)
         if entry
-          Rails.logger.info("Authentication: LDAP authentication succeeded for #{email} on server #{server.name}")
+          Rails.logger.info("Authentication: LDAP authentication succeeded for #{email} on server #{server.host}")
           return find_or_create_user(entry, server)
         else
-          Rails.logger.info("Authentication: LDAP authentication failed for #{email} on server #{server.name}")
+          Rails.logger.info("Authentication: LDAP authentication failed for #{email} on server #{server.host}")
         end
       end
 
