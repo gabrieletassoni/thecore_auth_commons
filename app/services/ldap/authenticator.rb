@@ -20,6 +20,11 @@ module Ldap
       )
 
       Rails.logger.debug("LDAP: Binding to server #{server.inspect} ")
+      unless ldap.bind
+        Rails.logger.debug("LDAP: Admin bind failed on server #{server.inspect}: #{ldap.get_operation_result.message}")
+        return nil
+      end
+
       filter = Net::LDAP::Filter.eq(server.auth_field, email) # server.auth_field
       treebase = server.base_dn
 
