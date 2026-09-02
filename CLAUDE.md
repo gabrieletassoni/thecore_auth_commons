@@ -121,6 +121,10 @@ Run `rails db:seed` (or `rails thecore_auth_commons:db:seed` in host context). C
 - **LdapServer destroy cascade**: `after_destroy :remove_users_with_auth_source` deletes all `User` records whose `auth_source == "ldap #{id}"`. Destructive — do not delete server records carelessly in production.
 - **`BackgroundLdapImportJob` queue**: `"#{ENV["COMPOSE_PROJECT_NAME"]}_default"` — same pattern as the host app's scheduled jobs.
 
+## CI/CD — gem publish (`.github/workflows/gempush.yml`)
+
+The RubyGems publish workflow's `on: push` trigger is scoped to `branches: [release/3]` only, not an unscoped `push`. This was tightened after an incident on a sibling repo (`thecore_generators`) where an unscoped trigger published a version bump pushed to an unreviewed feature branch. Keep the trigger scoped to `release/3` so publishing only ever happens on a merge/push to the actual release branch.
+
 ## Development workflow
 
 - **Update this CLAUDE.md** when adding models, changing the auth flow, adding OAuth providers, or modifying permission resolution logic.
