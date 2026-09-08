@@ -1,6 +1,11 @@
 require "devise"
 require "cancancan"
 require "kaminari"
+# activerecord-nulldb-adapter reaches into ActiveRecord::ConnectionAdapters internals
+# (e.g. SqlTypeMetadata::Deduplicable) that aren't necessarily loaded yet under a bare,
+# non-Rails-booted `require` chain (e.g. model_driven_api's plain minitest path) — make sure
+# ActiveRecord itself is fully loaded first.
+require "active_record"
 require "activerecord-nulldb-adapter"
 require "thecore_settings"
 require "net/ldap"
