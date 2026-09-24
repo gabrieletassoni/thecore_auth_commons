@@ -121,6 +121,10 @@ Run `rails db:seed` (or `rails thecore_auth_commons:db:seed` in host context). C
 - **LdapServer destroy cascade**: `after_destroy :remove_users_with_auth_source` deletes all `User` records whose `auth_source == "ldap #{id}"`. Destructive — do not delete server records carelessly in production.
 - **`BackgroundLdapImportJob` queue**: `"#{ENV["COMPOSE_PROJECT_NAME"]}_default"` — same pattern as the host app's scheduled jobs.
 
+## Devise 5 (3.6.0)
+
+Requires `devise >= 5.0.4, < 6` (was `~> 4.8`) for CVE-2026-40295: with `:timeoutable` (which `User` uses), Devise <= 5.0.3 redirected a non-GET request hitting an expired session to the unvalidated, attacker-controlled `Referer` (open redirect). The confirmable race (CVE-2026-32700) does not apply (`User` has no `:confirmable`). No removed Devise 5 API is used anywhere in the ecosystem; host-app checks (session + JWT login, 29 auth routes with and without Google/Entra providers) are identical on 4.9.4 and 5.0.4. The host's `test/integration/devise_timeout_open_redirect_test.rb` reproduces the CVE (red on 4.9.4).
+
 ## No upward references
 
 This is the lowest Thecore layer: it must never reference gems above it (`model_driven_api`, `rails_admin` via `thecore_ui_rails_admin`). Until 3.5.15 `Api::LdapServer` called `::ModelDrivenApi.smart_merge` (a no-op merge with `{}`) and `RailsAdmin::LdapServer` called `rails_admin` unconditionally, so loading `LdapServer` crashed in any app without those gems. Now `json_attrs` is plain `json_attrs || {}` and the RailsAdmin block runs only `if respond_to?(:rails_admin)`. Covered by `test/ldap_server_json_attrs_test.rb`. 3.5.16 also removed an empty scaffolded `Endpoints::LdapServer < NonCrudEndpoints` (NonCrudEndpoints is model_driven_api's): harmless with lazy autoloading, a `NameError` at boot with eager loading. `test/eager_load_test.rb` eager-loads the whole engine without model_driven_api to keep this class of bug out (the dummy app gained a Devise initializer so `User` can load).

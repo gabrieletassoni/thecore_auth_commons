@@ -30,7 +30,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'omniauth-entra-id', "~> 3.0"
   
   # https://github.com/heartcombo/devise
-  spec.add_dependency 'devise', '~> 4.8'
+  spec.add_dependency 'devise', '>= 5.0.4', '< 6' # 5.0.4: CVE-2026-40295 (Timeoutable open redirect)
   # Authorization
   # https://github.com/CanCanCommunity/cancancan
   spec.add_dependency 'cancancan', '~> 3.4'

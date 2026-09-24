@@ -14,7 +14,7 @@ gem "pg", "~> 1.1"
 
 # Authentication
 # https://github.com/heartcombo/devise
-gem 'devise', '~> 4.8'
+gem 'devise', '>= 5.0.4', '< 6'
 # Authorization
 # https://github.com/CanCanCommunity/cancancan
 gem 'cancancan', '~> 3.4'
