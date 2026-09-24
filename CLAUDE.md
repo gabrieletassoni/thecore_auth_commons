@@ -121,6 +121,10 @@ Run `rails db:seed` (or `rails thecore_auth_commons:db:seed` in host context). C
 - **LdapServer destroy cascade**: `after_destroy :remove_users_with_auth_source` deletes all `User` records whose `auth_source == "ldap #{id}"`. Destructive — do not delete server records carelessly in production.
 - **`BackgroundLdapImportJob` queue**: `"#{ENV["COMPOSE_PROJECT_NAME"]}_default"` — same pattern as the host app's scheduled jobs.
 
+## No upward references
+
+This is the lowest Thecore layer: it must never reference gems above it (`model_driven_api`, `rails_admin` via `thecore_ui_rails_admin`). Until 3.5.15 `Api::LdapServer` called `::ModelDrivenApi.smart_merge` (a no-op merge with `{}`) and `RailsAdmin::LdapServer` called `rails_admin` unconditionally, so loading `LdapServer` crashed in any app without those gems. Now `json_attrs` is plain `json_attrs || {}` and the RailsAdmin block runs only `if respond_to?(:rails_admin)`. Covered by `test/ldap_server_json_attrs_test.rb`.
+
 ## Test infrastructure
 
 - **Postgres only** — like every Thecore gem and host app, tests run on PostgreSQL, never SQLite (no `sqlite3` gem in the bundle; `pg` is the dev dependency). `test/dummy/config/database.yml` uses the `postgresql` adapter (`PGHOST`/`PGPORT`/`PGUSER`/`PGPASSWORD`, defaulting to `db`/`5432`/`postgres`/`postgres`) with databases `thecore_auth_commons_development`/`_test`/`_production`.

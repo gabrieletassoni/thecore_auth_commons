@@ -12,7 +12,9 @@ module Api::LdapServer
     # - methods: include the result of some method defined in the model
     # - include: include associated models, it's an object {} which also accepts the keys described here
     cattr_accessor :json_attrs
-    self.json_attrs = ::ModelDrivenApi.smart_merge (json_attrs || {}), {}
+    # No ::ModelDrivenApi.smart_merge here: this is the lowest Thecore layer and model_driven_api
+    # (which sits above it) is not a dependency; merging {} was a no-op anyway.
+    self.json_attrs = json_attrs || {}
 
     # Custom action callable by the API must be defined in /app/models/concerns/endpoints/
   end
