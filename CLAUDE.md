@@ -123,7 +123,7 @@ Run `rails db:seed` (or `rails thecore_auth_commons:db:seed` in host context). C
 
 ## No upward references
 
-This is the lowest Thecore layer: it must never reference gems above it (`model_driven_api`, `rails_admin` via `thecore_ui_rails_admin`). Until 3.5.15 `Api::LdapServer` called `::ModelDrivenApi.smart_merge` (a no-op merge with `{}`) and `RailsAdmin::LdapServer` called `rails_admin` unconditionally, so loading `LdapServer` crashed in any app without those gems. Now `json_attrs` is plain `json_attrs || {}` and the RailsAdmin block runs only `if respond_to?(:rails_admin)`. Covered by `test/ldap_server_json_attrs_test.rb`.
+This is the lowest Thecore layer: it must never reference gems above it (`model_driven_api`, `rails_admin` via `thecore_ui_rails_admin`). Until 3.5.15 `Api::LdapServer` called `::ModelDrivenApi.smart_merge` (a no-op merge with `{}`) and `RailsAdmin::LdapServer` called `rails_admin` unconditionally, so loading `LdapServer` crashed in any app without those gems. Now `json_attrs` is plain `json_attrs || {}` and the RailsAdmin block runs only `if respond_to?(:rails_admin)`. Covered by `test/ldap_server_json_attrs_test.rb`. 3.5.16 also removed an empty scaffolded `Endpoints::LdapServer < NonCrudEndpoints` (NonCrudEndpoints is model_driven_api's): harmless with lazy autoloading, a `NameError` at boot with eager loading. `test/eager_load_test.rb` eager-loads the whole engine without model_driven_api to keep this class of bug out (the dummy app gained a Devise initializer so `User` can load).
 
 ## Test infrastructure
 
