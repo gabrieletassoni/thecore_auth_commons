@@ -49,7 +49,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "factory_bot", "~> 6.2"
   spec.add_development_dependency "rubocop", "~> 1.45"
   spec.add_development_dependency "rubocop-rspec", "~> 2.18"
-  spec.add_development_dependency "sqlite3"
+  spec.add_development_dependency "pg", "~> 1.1"
 
   # The dummy test app's config/environments/test.rb sets config.active_storage/config.action_mailer.
   # rails/all requires each framework's railtie inside a `rescue LoadError` — without these gems in

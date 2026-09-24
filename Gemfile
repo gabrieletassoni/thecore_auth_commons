@@ -10,7 +10,7 @@ gemspec
 # until Rails 8 ships a compatible activesupport release.
 gem 'json', '< 3.0'
 
-gem "sqlite3"
+gem "pg", "~> 1.1"
 
 # Authentication
 # https://github.com/heartcombo/devise

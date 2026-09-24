@@ -121,6 +121,12 @@ Run `rails db:seed` (or `rails thecore_auth_commons:db:seed` in host context). C
 - **LdapServer destroy cascade**: `after_destroy :remove_users_with_auth_source` deletes all `User` records whose `auth_source == "ldap #{id}"`. Destructive — do not delete server records carelessly in production.
 - **`BackgroundLdapImportJob` queue**: `"#{ENV["COMPOSE_PROJECT_NAME"]}_default"` — same pattern as the host app's scheduled jobs.
 
+## Test infrastructure
+
+- **Postgres only** — like every Thecore gem and host app, tests run on PostgreSQL, never SQLite (no `sqlite3` gem in the bundle; `pg` is the dev dependency). `test/dummy/config/database.yml` uses the `postgresql` adapter (`PGHOST`/`PGPORT`/`PGUSER`/`PGPASSWORD`, defaulting to `db`/`5432`/`postgres`/`postgres`) with databases `thecore_auth_commons_development`/`_test`/`_production`.
+- **`DATABASE_URL` swap in `test/dummy/config/boot.rb`** — `DATABASE_URL` overrides `database.yml`, and the devcontainer points it at the host app's dev DB (`mytrack_dev`), which a schema load or `db:test:prepare` (drop + create) would clobber. `boot.rb` keeps `DATABASE_URL`'s server/credentials but always rewrites its database name to `thecore_auth_commons_<RAILS_ENV>`. It lives in `boot.rb` rather than `test/test_helper.rb` so every entry point (`bin/rails db:*`, Rails' spawned `db:test:prepare` subprocess) is covered; the test helper no longer sets `DATABASE_URL` at all.
+- **One-time setup**: `cd test/dummy && RAILS_ENV=test bin/rails db:create`. Then run the suite with `bin/test` from the gem root.
+
 ## CI/CD — gem publish (`.github/workflows/gempush.yml`)
 
 The RubyGems publish workflow's `on: push` trigger is scoped to `branches: [release/3]` only, not an unscoped `push`. This was tightened after an incident on a sibling repo (`thecore_generators`) where an unscoped trigger published a version bump pushed to an unreviewed feature branch. Keep the trigger scoped to `release/3` so publishing only ever happens on a merge/push to the actual release branch.
