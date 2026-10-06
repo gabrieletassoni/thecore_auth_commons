@@ -10,8 +10,9 @@ class LdapServer < ApplicationRecord
   validates :base_dn, presence: true
 
   # Callbacks
-  # After the record is actually deleted from the DB, remove all associated users which have the same auth_source with value "ldap #{id}"
-  after_destroy :remove_users_with_auth_source
+  # Users imported from this server outlive it: they become local users, same record and roles,
+  # and need a local password set by hand to log in again.
+  after_destroy :turn_users_into_local_users
 
   def test_connection
     # Test the connection to the LDAP server
@@ -37,10 +38,10 @@ class LdapServer < ApplicationRecord
 
   private
 
-  # This method is called after the record is destroyed
-  def remove_users_with_auth_source
-    User.where(auth_source: "ldap #{id}").find_each do |user|
-      user.destroy
-    end
+  # Destroying the users here used to strip their roles even when the destroy was refused: a
+  # User's dependents are destroyed before any later before_destroy guard aborts, and the
+  # abort's rollback is swallowed inside this record's own transaction, so it never undid them.
+  def turn_users_into_local_users
+    User.where(auth_source: "ldap #{id}").update_all(auth_source: "local", updated_at: Time.current)
   end
 end

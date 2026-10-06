@@ -104,7 +104,7 @@ Multiple servers are supported, ordered by `priority` (ascending). Each server c
 
 On LDAP login or import, `memberOf` groups are read; matching group names become `Role` records assigned to the user. Groups named `Administrators`, `Domain Admins`, `Schema Admins`, `Enterprise Admins`, `admins`, or `administrators` also grant `user.admin = true`.
 
-Deleting a `LdapServer` record destroys all users whose `auth_source` is `"ldap #{id}"`.
+Deleting a `LdapServer` record keeps all users whose `auth_source` is `"ldap #{id}"` — same record, same roles — and turns them into local users (`auth_source = "local"`). To log in again they need a local password, set by hand.
 
 ### Background LDAP import
 

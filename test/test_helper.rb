@@ -2,7 +2,9 @@
 ENV["RAILS_ENV"] = "test"
 
 require_relative "../test/dummy/config/environment"
-ActiveRecord::Migrator.migrations_paths = [File.expand_path("../test/dummy/db/migrate", __dir__)]
+# The dummy app has no schema of its own: build the test database from the engine's migrations.
+ActiveRecord::Migrator.migrations_paths = [File.expand_path("../db/migrate", __dir__)]
+ActiveRecord::Tasks::DatabaseTasks.migrate
 require "rails/test_help"
 
 # Load fixtures from the engine

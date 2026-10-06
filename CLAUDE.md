@@ -22,7 +22,7 @@ app/
     predicate.rb                    # Vocabulary: "can" / "cannot"
     action.rb                       # Vocabulary: manage / create / read / update / destroy
     target.rb                       # Vocabulary: "all" + one row per AR model (underscore)
-    ldap_server.rb                  # LDAP server config; destroy cascades to associated users
+    ldap_server.rb                  # LDAP server config; destroy turns its users into local users
     concerns/api/ldap_server.rb     # model_driven_api JSON attrs for LdapServer
     concerns/rails_admin/ldap_server.rb
     concerns/endpoints/ldap_server.rb
@@ -118,7 +118,7 @@ Run `rails db:seed` (or `rails thecore_auth_commons:db:seed` in host context). C
 - **Never delete Action records**: `Abilities::ThecoreAuthCommons` explicitly prevents `create Action` to guard vocabulary integrity.
 - **`align_user` saves with `validate: false`**: intentional — LDAP-sourced users may lack fields required by the host app's validations (e.g. `name`, `surname`). Do not change this without checking host-app model constraints.
 - **`generate_secure_password`**: always produces a password compliant with the policy (upper + lower + digit + special). Used for LDAP/OAuth users; minimum length 4, default 20.
-- **LdapServer destroy cascade**: `after_destroy :remove_users_with_auth_source` deletes all `User` records whose `auth_source == "ldap #{id}"`. Destructive — do not delete server records carelessly in production.
+- **LdapServer destroy keeps its users**: `after_destroy :turn_users_into_local_users` sets `auth_source = "local"` (via `update_all`) on every `User` whose `auth_source == "ldap #{id}"`; record, roles and everything else stay as they were, and logging in again needs a local password set by hand. Until 3.6.0 it destroyed those users instead, and that stripped their roles even when the destroy was refused: a `User`'s `dependent: :destroy` children (`role_users`) go before a later `before_destroy` guard (the host's "user has logged time" guard) aborts, and the abort's rollback is swallowed inside the `LdapServer`'s own transaction (a nested `transaction` without `requires_new`), so the user survived without roles. Covered by `test/ldap_server_removal_test.rb`.
 - **`BackgroundLdapImportJob` queue**: `"#{ENV["COMPOSE_PROJECT_NAME"]}_default"` — same pattern as the host app's scheduled jobs.
 
 ## Devise 5 (3.6.0)
@@ -133,6 +133,7 @@ This is the lowest Thecore layer: it must never reference gems above it (`model_
 
 - **Postgres only** — like every Thecore gem and host app, tests run on PostgreSQL, never SQLite (no `sqlite3` gem in the bundle; `pg` is the dev dependency). `test/dummy/config/database.yml` uses the `postgresql` adapter (`PGHOST`/`PGPORT`/`PGUSER`/`PGPASSWORD`, defaulting to `db`/`5432`/`postgres`/`postgres`) with databases `thecore_auth_commons_development`/`_test`/`_production`.
 - **`DATABASE_URL` swap in `test/dummy/config/boot.rb`** — `DATABASE_URL` overrides `database.yml`, and the devcontainer points it at the host app's dev DB (`mytrack_dev`), which a schema load or `db:test:prepare` (drop + create) would clobber. `boot.rb` keeps `DATABASE_URL`'s server/credentials but always rewrites its database name to `thecore_auth_commons_<RAILS_ENV>`. It lives in `boot.rb` rather than `test/test_helper.rb` so every entry point (`bin/rails db:*`, Rails' spawned `db:test:prepare` subprocess) is covered; the test helper no longer sets `DATABASE_URL` at all.
+- **Schema from the engine's own migrations** — the dummy app has no `db/` of its own: `test/test_helper.rb` points `migrations_paths` at the gem's `db/migrate` and runs them (idempotent) before the suite, so tests can use `users`/`roles`/`role_users`/`ldap_servers`.
 - **One-time setup**: `cd test/dummy && RAILS_ENV=test bin/rails db:create`. Then run the suite with `bin/test` from the gem root.
 
 ## CI/CD — gem publish (`.github/workflows/gempush.yml`)
