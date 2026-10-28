@@ -44,6 +44,42 @@ module ThecoreAuthCommons
     u
   end
 
+  INITIAL_ADMIN_PASSWORD_FILE = "admin_initial_password".freeze
+
+  # Crea il primo admin, solo se nel DB non ce n'è nessuno. La password è ADMIN_PASSWORD,
+  # oppure una casuale scritta in <storage_dir>/admin_initial_password (0600) e mai nel log.
+  # Un file già presente non viene mai sovrascritto: in quel caso l'admin non viene creato.
+  # Se il salvataggio fallisce il file viene tolto, così il seed successivo può riprovare.
+  def self.seed_first_admin(storage_dir: Rails.root.join("storage"))
+    return if User.where(admin: true).exists?
+
+    email = "admin@#{ENV["BASE_DOMAIN"].presence || "example.com"}"
+    password = ENV["ADMIN_PASSWORD"].presence
+    unless password
+      generated_password_file = File.join(storage_dir.to_s, INITIAL_ADMIN_PASSWORD_FILE)
+      password = generate_secure_password
+      begin
+        FileUtils.mkdir_p(storage_dir.to_s)
+        # EXCL: mai sovrascrivere, anche con backend e worker che lanciano il seed insieme
+        File.open(generated_password_file, File::WRONLY | File::CREAT | File::EXCL, 0o600) { |f| f.puts password }
+      rescue Errno::EEXIST
+        puts "Admin #{email} NON creato: #{generated_password_file} esiste già. Cancellalo e rilancia il seed."
+        return
+      end
+    end
+
+    begin
+      u = User.find_or_initialize_by(email: email)
+      u.password = u.password_confirmation = password
+      u.admin = true
+      u.save!(validate: false)
+    rescue StandardError
+      File.delete(generated_password_file) if generated_password_file
+      raise
+    end
+    puts(generated_password_file ? "Admin #{email} creato: password in #{generated_password_file}" : "Admin #{email} creato con la password di ADMIN_PASSWORD")
+  end
+
   def self.import_ldap_users_task
     puts "== Avvio sincronizzazione utenti da LDAP =="
 
@@ -127,17 +163,17 @@ module ThecoreAuthCommons
 
     # Obbliga almeno un carattere da ogni gruppo
     password = [
-      lowercase.sample,
-      uppercase.sample,
-      numbers.sample,
-      symbols.sample,
+      lowercase.sample(random: SecureRandom),
+      uppercase.sample(random: SecureRandom),
+      numbers.sample(random: SecureRandom),
+      symbols.sample(random: SecureRandom),
     ]
 
     # Caratteri restanti scelti a caso tra tutti
     all_characters = lowercase + uppercase + numbers + symbols
-    (length - 4).times { password << all_characters.sample }
+    (length - 4).times { password << all_characters.sample(random: SecureRandom) }
 
     # Mischia per evitare ordine prevedibile
-    password.shuffle.join
+    password.shuffle(random: SecureRandom).join
   end
 end

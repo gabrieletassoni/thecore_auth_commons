@@ -34,7 +34,7 @@ config/initializers/
   after_initialize.rb               # Includes ThecoreAuthCommonsCanCanCanConcern into Ability at boot
   omniauth.rb                       # Registers Entra ID / Google providers when env vars present
 lib/
-  thecore_auth_commons.rb           # Module-level helpers: check_user, align_user, generate_secure_password, import_ldap_users_task, entra_id_vars?, google_oauth2_vars?
+  thecore_auth_commons.rb           # Module-level helpers: seed_first_admin, check_user, align_user, generate_secure_password, import_ldap_users_task, entra_id_vars?, google_oauth2_vars?
   thecore_auth_commons/engine.rb
   thecore/seed.rb
 db/
@@ -107,7 +107,7 @@ Providers registered only when the relevant env vars are all present (`entra_id_
 ## Seeds
 
 Run `rails db:seed` (or `rails thecore_auth_commons:db:seed` in host context). Creates:
-- Admin user: `admin@BASE_DOMAIN` (env var, default `example.com`) / `ADMIN_PASSWORD` (default `Change#1`)
+- Admin user `admin@BASE_DOMAIN` (env var, default `example.com`), via `ThecoreAuthCommons.seed_first_admin`, only when no admin exists (keep this guard: existing installations must not change). Password: `ADMIN_PASSWORD` if set, else `generate_secure_password` written to `storage/admin_initial_password` (`File::EXCL`, `0600`), logged as its path only, never the value. An existing file is never overwritten: the admin is then not created and the log says so (the entrypoint reseeds on every start, so that line repeats until someone deletes the file). If the save fails the file is deleted and the error re-raised, so no stale file blocks the next seed. Until 3.6.1 the fallback was a fixed `Change#1` on every installation without `ADMIN_PASSWORD`. Covered by `test/seed_first_admin_test.rb`.
 - `Predicate`: `can`, `cannot`
 - `Action`: `manage`, `create`, `read`, `update`, `destroy`
 - `Target`: `all` + each `ApplicationRecord.subclass` underscored — so **seeds must run after all models are loaded** (Zeitwerk eager-loads first).
@@ -117,7 +117,7 @@ Run `rails db:seed` (or `rails thecore_auth_commons:db:seed` in host context). C
 - **Adding a new permission at runtime**: create `Permission` (predicate + action + target), create `PermissionRole` linking it to a `Role`, assign the `Role` to the `User`. Takes effect on next request (Ability is instantiated per-request).
 - **Never delete Action records**: `Abilities::ThecoreAuthCommons` explicitly prevents `create Action` to guard vocabulary integrity.
 - **`align_user` saves with `validate: false`**: intentional — LDAP-sourced users may lack fields required by the host app's validations (e.g. `name`, `surname`). Do not change this without checking host-app model constraints.
-- **`generate_secure_password`**: always produces a password compliant with the policy (upper + lower + digit + special). Used for LDAP/OAuth users; minimum length 4, default 20.
+- **`generate_secure_password`**: always produces a password compliant with the policy (upper + lower + digit + special). Used for LDAP/OAuth users and the seeded admin; minimum length 4, default 20; draws from `SecureRandom` (since 3.6.2; before, Ruby's default PRNG).
 - **LdapServer destroy keeps its users**: `after_destroy :turn_users_into_local_users` sets `auth_source = "local"` (via `update_all`) on every `User` whose `auth_source == "ldap #{id}"`; record, roles and everything else stay as they were, and logging in again needs a local password set by hand. Until 3.6.0 it destroyed those users instead, and that stripped their roles even when the destroy was refused: a `User`'s `dependent: :destroy` children (`role_users`) go before a later `before_destroy` guard (the host's "user has logged time" guard) aborts, and the abort's rollback is swallowed inside the `LdapServer`'s own transaction (a nested `transaction` without `requires_new`), so the user survived without roles. Covered by `test/ldap_server_removal_test.rb`.
 - **`BackgroundLdapImportJob` queue**: `"#{ENV["COMPOSE_PROJECT_NAME"]}_default"` — same pattern as the host app's scheduled jobs.
 

@@ -1,5 +1,11 @@
 # Changelog
 
+## [3.6.2] - 2026-10-28
+
+### Security
+- **No fixed admin password at seed time** — without `ADMIN_PASSWORD` the seed used to create the first admin with `Change#1`. It now generates a random password (`SecureRandom`) and writes it to `storage/admin_initial_password` (`0600`, never overwritten, never logged). Only new installations are affected: the admin is still created only when none exists.
+- `generate_secure_password` draws from `SecureRandom`.
+
 ## [3.5.14] - 2026-09-08
 
 ### Fixed

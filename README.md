@@ -23,7 +23,7 @@ Provides authentication and role-based authorization for Rails applications in t
 | `GOOGLE_CLIENT_ID` | — | Google OAuth2 client ID |
 | `GOOGLE_CLIENT_SECRET` | — | Google OAuth2 client secret |
 | `BASE_DOMAIN` | `example.com` | Used to build the default admin email at seed time |
-| `ADMIN_PASSWORD` | `Change#1` | Default admin password at seed time |
+| `ADMIN_PASSWORD` | — (random) | First admin's password at seed time; when unset the seed generates a random one and writes it to `storage/admin_initial_password` (see Seeding) |
 
 OmniAuth providers are registered only when their respective env vars are all present.
 
@@ -73,7 +73,7 @@ actions:    [:manage, :create, :read, :update, :destroy]
 targets:    ["all"] + ApplicationRecord.subclasses.map { |m| m.to_s.underscore }
 ```
 
-It also creates the first admin user (`admin@BASE_DOMAIN` / `ADMIN_PASSWORD`) if no admin exists yet.
+It also creates the first admin user, `admin@BASE_DOMAIN`, only if the database has no admin yet (existing admins are never touched). Its password is `ADMIN_PASSWORD` when set. Otherwise the seed generates a random one and writes it to `<Rails.root>/storage/admin_initial_password` with mode `0600`; the log gets one line saying where it is, never the password. In a `thecore_devcontainer` deployment that's `/root/persistence/${COMPOSE_PROJECT_NAME}/storage/admin_initial_password` on the host, or `docker compose exec backend cat storage/admin_initial_password`. After the first login change the password and delete the file. An existing file is never overwritten: if it's there, the admin is not created and the log says to delete the file and seed again. Until 3.6.1 the fallback was the fixed `Change#1`.
 
 To add a permission via console:
 

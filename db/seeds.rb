@@ -3,15 +3,7 @@ puts "Loading ThecoreAuthCommons seeds"
 # Needing this since in the rake task is not aeger loaded
 Zeitwerk::Loader.eager_load_all
 
-email = "admin@#{ENV["BASE_DOMAIN"].presence || "example.com"}"
-psswd = ENV["ADMIN_PASSWORD"].presence || "Change#1"
-
-unless User.where(admin: true).exists?
-    u = User.find_or_initialize_by(email: email)
-    u.password = u.password_confirmation = psswd
-    u.admin = true
-    u.save(validate: false)
-end
+ThecoreAuthCommons.seed_first_admin
 
 @values = {
     predicates: %i[can cannot],
