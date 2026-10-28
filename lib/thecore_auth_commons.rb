@@ -30,18 +30,22 @@ module ThecoreAuthCommons
     ENV["GOOGLE_CLIENT_ID"].present? && ENV["GOOGLE_CLIENT_SECRET"].present?
   end
 
-  # Controlla se l'utente esiste, altrimenti lo crea con una password casuale
-  # e lo restituisce. Se l'utente esiste già, lo restituisce senza modificarlo.
-
+  # Restituisce l'utente con l'email verificata dal provider OAuth, creandolo se non esiste:
+  # password casuale, auth_source = provider, nessun admin e nessun ruolo (si assegnano a mano).
+  # Di un utente esistente aggiorna solo nome e cognome: password, admin e auth_source restano,
+  # così chi ha anche una password locale può continuare a usarla. nil se l'utente non è salvabile.
   def self.check_user(email, name, surname, provider)
-    u = User.find_or_initialize_by(email: email)
-    u.name = name
-    u.surname = surname
-    u.password = u.password_confirmation = generate_secure_password
-    u.auth_source = provider # 'google' or 'microsoft'
-    u.admin = true
+    return if email.blank?
+
+    u = User.find_or_initialize_by(email: email.to_s.strip.downcase)
+    u.name = name if u.respond_to?(:name=)
+    u.surname = surname if u.respond_to?(:surname=)
+    if u.new_record?
+      u.password = u.password_confirmation = generate_secure_password
+      u.auth_source = provider # 'google' or 'microsoft'
+    end
     u.save if u.changed?
-    u
+    u if u.persisted?
   end
 
   INITIAL_ADMIN_PASSWORD_FILE = "admin_initial_password".freeze

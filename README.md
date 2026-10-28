@@ -112,7 +112,7 @@ Deleting a `LdapServer` record keeps all users whose `auth_source` is `"ldap #{i
 
 ### OAuth2 (Entra ID / Google)
 
-Handled by `Users::OmniauthCallbacksController`. On callback, `ThecoreAuthCommons.check_user` finds or creates the user (with a random secure password) and sets `auth_source` to `'google'` or `'microsoft'`. New OAuth users are created as admin.
+Handled by `Users::OmniauthCallbacksController`. On callback, `ThecoreAuthCommons.check_user` finds the user by the provider-verified email or creates them (random secure password, `auth_source` `'google'` or `'microsoft'`, no admin, no roles: an administrator assigns those). An existing user's password, admin flag and `auth_source` are never changed by an OAuth login.
 
 ## Password policy
 

@@ -1,5 +1,10 @@
 # Changelog
 
+## [3.6.3] - 2026-10-28
+
+### Security
+- **OAuth login no longer grants admin** (Odoo #5837) — `check_user` used to set `admin = true` for every Google/Entra login and regenerate the password on each one. New OAuth users are now created without admin or roles; an existing user keeps password, admin flag and `auth_source` (only `name`/`surname` are refreshed). It returns `nil` for a blank email or an unsavable user instead of an unsaved record, and no longer crashes on a `User` without `name`/`surname` columns.
+
 ## [3.6.2] - 2026-10-28
 
 ### Security

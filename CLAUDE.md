@@ -102,7 +102,7 @@ The effective set is `manage` on Task, Filter, Milestone, Link, Report, TimeTabl
 
 ## OAuth2
 
-Providers registered only when the relevant env vars are all present (`entra_id_vars?` / `google_oauth2_vars?`). `check_user` creates the user with `auth_source = provider`, random secure password, and `admin: true`. Uses `omniauth-entra-id` and `omniauth-google-oauth2`.
+Providers registered only when the relevant env vars are all present (`entra_id_vars?` / `google_oauth2_vars?`). `check_user(email, name, surname, provider)` gets the email the provider verified, never one from request params (callers pass `request.env['omniauth.auth']`'s). It finds the user by email (stripped and downcased) and creates them if missing, with `auth_source = provider`, a random secure password, no admin and no roles. An existing user only gets `name`/`surname` updated: password, `admin` and `auth_source` are untouched, so a local password keeps working. `name`/`surname` are set only when the host's `User` has them. It returns `nil` for a blank email or a user that can't be saved (e.g. a host validation OAuth can't satisfy), and callers treat `nil` as "not registered". Until 3.6.2 it set `admin = true` on every OAuth login and rewrote the password each time (Odoo #5837). Covered by `test/check_user_test.rb`. Uses `omniauth-entra-id` and `omniauth-google-oauth2`.
 
 ## Seeds
 
