@@ -2,166 +2,53 @@
 
 ## Purpose
 
-Rails engine that provides authentication (Devise: local, LDAP, OAuth2) and database-driven role-based authorization (CanCanCan) for the Thecore ecosystem.
+Rails engine that provides authentication (Devise: local, LDAP, OAuth2) and database-driven role-based authorization (CanCanCan) for the Thecore ecosystem. Lowest Thecore layer; public gem on RubyGems.
 
-## Repository layout
+## Where things are
 
-```
-app/
-  controllers/users/
-    sessions_controller.rb          # Devise override: local → LDAP fallback login
-    omniauth_callbacks_controller.rb# OAuth2 callback handler
-  jobs/
-    background_ldap_import_job.rb   # ActiveJob wrapper for ThecoreAuthCommons.import_ldap_users_task
-  models/
-    user.rb                         # Devise model with role/password/admin validations
-    role.rb                         # Named role; has many users (through role_users) and permissions
-    role_user.rb                    # Join: User ↔ Role
-    permission.rb                   # Triplet: predicate + action + target (unique)
-    permission_role.rb              # Join: Permission ↔ Role
-    predicate.rb                    # Vocabulary: "can" / "cannot"
-    action.rb                       # Vocabulary: manage / create / read / update / destroy
-    target.rb                       # Vocabulary: "all" + one row per AR model (underscore)
-    ldap_server.rb                  # LDAP server config; destroy turns its users into local users
-    concerns/api/ldap_server.rb     # model_driven_api JSON attrs for LdapServer
-    concerns/rails_admin/ldap_server.rb
-    concerns/endpoints/ldap_server.rb
-  services/ldap/
-    authenticator.rb                # Tries each LdapServer in priority order; calls align_user on success
-config/initializers/
-  abilities.rb                      # Abilities::ThecoreAuthCommons — hardcoded base rules
-  concern_cancancan.rb              # ThecoreAuthCommonsCanCanCanConcern — injects DB permissions into Ability
-  after_initialize.rb               # Includes ThecoreAuthCommonsCanCanCanConcern into Ability at boot
-  omniauth.rb                       # Registers Entra ID / Google providers when env vars present
-lib/
-  thecore_auth_commons.rb           # Module-level helpers: seed_first_admin, check_user, align_user, generate_secure_password, import_ldap_users_task, entra_id_vars?, google_oauth2_vars?
-  thecore_auth_commons/engine.rb
-  thecore/seed.rb
-db/
-  seeds.rb                          # Creates first admin; populates predicates/actions/targets
-  migrate/
-    20160209153816_create_permissions_chain.rb  # Creates predicates, actions, targets, permissions, permission_roles
-    20250516074016_create_ldap_servers.rb
-    20250516075204_add_auth_source_to_user.rb
-    20251216110301_add_ldap_match_fields_to_ldap_server.rb
-    20251216111217_add_code_to_ldap_server.rb
-```
+- `app/models/` — `User`, `Role`, `RoleUser`, `Permission` (predicate + action + target), `PermissionRole`, vocabularies `Predicate`/`Action`/`Target`, `LdapServer` (+ its `api`/`rails_admin` concerns)
+- `app/controllers/users/` — `SessionsController` (local → LDAP fallback), `OmniauthCallbacksController`
+- `app/services/ldap/authenticator.rb`, `app/jobs/background_ldap_import_job.rb`
+- `config/initializers/` — `abilities.rb` (base rules), `concern_cancancan.rb` + `after_initialize.rb` (DB permissions into the host's `Ability`), `omniauth.rb`
+- `lib/thecore_auth_commons.rb` — `seed_first_admin`, `check_user`, `align_user`, `generate_secure_password`, `import_ldap_users_task`
+- `db/seeds.rb`, `db/migrate/`; full annotated tree in `docs/agents/repository-layout.md`
 
-## Authorization pipeline
+## Read before working on…
 
-### can + can is always additive
-
-CanCan "last wins" applies **only when `cannot` is involved**. Two `can` rules on the same target are purely additive: calling `can :read, Task` after `can :manage, Task` does **not** reduce the permission — `can?(:manage, Task)` still returns `true`. The only way to revoke a previously granted ability is with an explicit `cannot`.
-
-### Permission resolution order
-
-`Ability#initialize` executes three layers (CanCan **last-wins**):
-
-1. `Abilities::ThecoreAuthCommons` — admin gets `can :manage, :all`; no one can `create Action`; no one can destroy their own User record.
-2. All other `Abilities::*` constants defined anywhere in the app (discovered via `Abilities.constants(false)`).
-3. **Database permissions** — every `Permission` linked to `user` via `roles → permission_roles → permissions`, ordered by `permission.id` (not by role assignment date or order), translated literally into:
-
-```ruby
-self.send(predicate.name.to_sym, action.name.to_sym,
-          target.name.classify.constantize rescue target.name.to_sym)
-```
-
-The concern is injected at boot via `Ability.send(:include, ThecoreAuthCommonsCanCanCanConcern)` in `after_initialize.rb`. The host app's `Ability` class must exist; this engine does not define it.
-
-### Multiple roles on the same user
-
-When a user has more than one role, **all permissions from all roles are applied** in a single pass ordered by `permission.id`. The date or sequence in which roles were assigned (`RoleUser` records) is irrelevant — only the numeric `id` of the `Permission` row determines application order.
-
-Because all seeded permissions use the `can` predicate, the result is always the **union** of the two roles' permission sets. A `can :read` on a target where another role already granted `can :manage` does not downgrade the ability — CanCan's rules are additive for `can`, and only `cannot` can revoke a prior grant.
-
-**Example — user with both Pianificatore and Manutentore:**
-
-| Target | Pianificatore | Manutentore | Effective |
-|--------|--------------|-------------|-----------|
-| `Task` | `manage` | `read` | `manage` — `can :read` is redundant after `can :manage` |
-| `Report` | `read` | `manage` | `manage` — the higher-id `can :manage` is additive |
-| `TimeTable` | — | `manage` | `manage` |
-| `Filter` | `manage` | — | `manage` |
-| `Project`, `Customer`, `Site`, `Assignment`, `TaskType` | `read` | `read` | `read` |
-| `User`, `Unavailability`, `UnavailabilityType` | `read` | — | `read` |
-| `PostInterventionActivity` | — | `read` | `read` |
-
-The effective set is `manage` on Task, Filter, Milestone, Link, Report, TimeTable and `read` on all reference models from both roles — regardless of assignment order.
-
-## Login flow
-
-`Users::SessionsController#create`:
-1. Try Devise local auth (`warden.authenticate`).
-2. On failure, try `Ldap::Authenticator#authenticate` — iterates `LdapServer.all` (ordered by `priority`), admin-binds, searches for the user by `auth_field`, then binds as the user DN to verify credentials.
-3. On LDAP success, calls `ThecoreAuthCommons.align_user` which find-or-initializes the User, maps LDAP attributes to model fields, assigns roles from `memberOf` groups, and saves with `validate: false`.
-4. If both fail, renders the login form with `401`.
-
-## LDAP group → role mapping
-
-`align_user` reads `entry[:memberOf]`, extracts the CN (`group.split(",").first.split("=").last`), and calls `Role.find_or_create_by(name: group_name)`. Groups named `Administrators`, `Domain Admins`, `Schema Admins`, `Enterprise Admins`, `admins`, `administrators` also set `user.admin = true` (only promotes, never demotes an existing admin).
-
-## OAuth2
-
-Providers registered only when the relevant env vars are all present (`entra_id_vars?` / `google_oauth2_vars?`). `check_user(email, name, surname, provider)` gets the email the provider verified, never one from request params (callers pass `request.env['omniauth.auth']`'s). It finds the user by email (stripped and downcased) and creates them if missing, with `auth_source = provider`, a random secure password, no admin and no roles. An existing user only gets `name`/`surname` updated: password, `admin` and `auth_source` are untouched, so a local password keeps working. `name`/`surname` are set only when the host's `User` has them. It returns `nil` for a blank email or a user that can't be saved (e.g. a host validation OAuth can't satisfy), and callers treat `nil` as "not registered". Until 3.6.2 it set `admin = true` on every OAuth login and rewrote the password each time (Odoo #5837). Covered by `test/check_user_test.rb`. Uses `omniauth-entra-id` and `omniauth-google-oauth2`.
-
-## Seeds
-
-Run `rails db:seed` (or `rails thecore_auth_commons:db:seed` in host context). Creates:
-- Admin user `admin@BASE_DOMAIN` (env var, default `example.com`), via `ThecoreAuthCommons.seed_first_admin`, only when no admin exists (keep this guard: existing installations must not change). Password: `ADMIN_PASSWORD` if set, else `generate_secure_password` written to `storage/admin_initial_password` (`File::EXCL`, `0600`), logged as its path only, never the value. An existing file is never overwritten: the admin is then not created and the log says so (the entrypoint reseeds on every start, so that line repeats until someone deletes the file). If the save fails the file is deleted and the error re-raised, so no stale file blocks the next seed. Until 3.6.1 the fallback was a fixed `Change#1` on every installation without `ADMIN_PASSWORD`. Covered by `test/seed_first_admin_test.rb`.
-- `Predicate`: `can`, `cannot`
-- `Action`: `manage`, `create`, `read`, `update`, `destroy`
-- `Target`: `all` + each `ApplicationRecord.subclass` underscored — so **seeds must run after all models are loaded** (Zeitwerk eager-loads first).
+| Topic | File |
+| --- | --- |
+| Full file tree | `docs/agents/repository-layout.md` |
+| Ability layers, permission order, multiple roles, `can`/`cannot` | `docs/agents/authorization.md` |
+| Login flow, LDAP group → role, OAuth2 `check_user`, seeds/first admin, LdapServer removal, Devise 5 | `docs/agents/authentication.md` |
+| No upward references, Postgres test setup, gem publish workflow, security scanning | `docs/agents/testing-ci-and-security.md` |
+| Tickets (GitHub Issues), triage labels, glossary/ADR layout | `docs/agents/issue-tracker.md`, `triage-labels.md`, `domain.md` |
 
 ## Key conventions
 
+- **can + can is always additive**: only an explicit `cannot` revokes a grant; DB permissions apply in `permission.id` order, never role-assignment order (`docs/agents/authorization.md`). The host app's `Ability` class must exist; this engine does not define it.
 - **Adding a new permission at runtime**: create `Permission` (predicate + action + target), create `PermissionRole` linking it to a `Role`, assign the `Role` to the `User`. Takes effect on next request (Ability is instantiated per-request).
 - **Never delete Action records**: `Abilities::ThecoreAuthCommons` explicitly prevents `create Action` to guard vocabulary integrity.
 - **`align_user` saves with `validate: false`**: intentional — LDAP-sourced users may lack fields required by the host app's validations (e.g. `name`, `surname`). Do not change this without checking host-app model constraints.
 - **`generate_secure_password`**: always produces a password compliant with the policy (upper + lower + digit + special). Used for LDAP/OAuth users and the seeded admin; minimum length 4, default 20; draws from `SecureRandom` (since 3.6.2; before, Ruby's default PRNG).
-- **LdapServer destroy keeps its users**: `after_destroy :turn_users_into_local_users` sets `auth_source = "local"` (via `update_all`) on every `User` whose `auth_source == "ldap #{id}"`; record, roles and everything else stay as they were, and logging in again needs a local password set by hand. Until 3.6.0 it destroyed those users instead, and that stripped their roles even when the destroy was refused: a `User`'s `dependent: :destroy` children (`role_users`) go before a later `before_destroy` guard (the host's "user has logged time" guard) aborts, and the abort's rollback is swallowed inside the `LdapServer`'s own transaction (a nested `transaction` without `requires_new`), so the user survived without roles. Covered by `test/ldap_server_removal_test.rb`.
+- **OAuth `check_user`** takes the email only from the provider-verified `omniauth.auth`, never from request params; never grants admin, never rewrites an existing user's password.
+- **First admin** is seeded only when no admin exists (keep this guard: existing installations must not change); its generated password is never logged. Seeds must run after all models are loaded (`Target` rows come from `ApplicationRecord.subclasses`).
+- **LdapServer destroy keeps its users** (turns them into local users); never destroy them (`docs/agents/authentication.md`).
 - **`BackgroundLdapImportJob` queue**: `"#{ENV["COMPOSE_PROJECT_NAME"]}_default"` — same pattern as the host app's scheduled jobs.
+- **No upward references**: this is the lowest Thecore layer: it must never reference gems above it (`model_driven_api`, `rails_admin` via `thecore_ui_rails_admin`); `test/eager_load_test.rb` guards it.
+- **Postgres only**, never SQLite. `test/dummy/config/boot.rb` rewrites `DATABASE_URL`'s database name so tests never touch the host's dev DB.
+- **Gem publish**: `.github/workflows/gempush.yml` publishes when `lib/*/version.rb` changes; keep its `on: push` trigger scoped to `release/3`.
+- **Secret push protection**: if it fires on a real secret, remove it from the commit and rotate the secret; never bypass it.
 
-## Devise 5 (3.6.0)
+## Commands
 
-Requires `devise >= 5.0.4, < 6` (was `~> 4.8`) for CVE-2026-40295: with `:timeoutable` (which `User` uses), Devise <= 5.0.3 redirected a non-GET request hitting an expired session to the unvalidated, attacker-controlled `Referer` (open redirect). The confirmable race (CVE-2026-32700) does not apply (`User` has no `:confirmable`). No removed Devise 5 API is used anywhere in the ecosystem; host-app checks (session + JWT login, 29 auth routes with and without Google/Entra providers) are identical on 4.9.4 and 5.0.4. The host's `test/integration/devise_timeout_open_redirect_test.rb` reproduces the CVE (red on 4.9.4).
-
-## No upward references
-
-This is the lowest Thecore layer: it must never reference gems above it (`model_driven_api`, `rails_admin` via `thecore_ui_rails_admin`). Until 3.5.15 `Api::LdapServer` called `::ModelDrivenApi.smart_merge` (a no-op merge with `{}`) and `RailsAdmin::LdapServer` called `rails_admin` unconditionally, so loading `LdapServer` crashed in any app without those gems. Now `json_attrs` is plain `json_attrs || {}` and the RailsAdmin block runs only `if respond_to?(:rails_admin)`. Covered by `test/ldap_server_json_attrs_test.rb`. 3.5.16 also removed an empty scaffolded `Endpoints::LdapServer < NonCrudEndpoints` (NonCrudEndpoints is model_driven_api's): harmless with lazy autoloading, a `NameError` at boot with eager loading. `test/eager_load_test.rb` eager-loads the whole engine without model_driven_api to keep this class of bug out (the dummy app gained a Devise initializer so `User` can load).
-
-## Test infrastructure
-
-- **Postgres only** — like every Thecore gem and host app, tests run on PostgreSQL, never SQLite (no `sqlite3` gem in the bundle; `pg` is the dev dependency). `test/dummy/config/database.yml` uses the `postgresql` adapter (`PGHOST`/`PGPORT`/`PGUSER`/`PGPASSWORD`, defaulting to `db`/`5432`/`postgres`/`postgres`) with databases `thecore_auth_commons_development`/`_test`/`_production`.
-- **`DATABASE_URL` swap in `test/dummy/config/boot.rb`** — `DATABASE_URL` overrides `database.yml`, and the devcontainer points it at the host app's dev DB (`mytrack_dev`), which a schema load or `db:test:prepare` (drop + create) would clobber. `boot.rb` keeps `DATABASE_URL`'s server/credentials but always rewrites its database name to `thecore_auth_commons_<RAILS_ENV>`. It lives in `boot.rb` rather than `test/test_helper.rb` so every entry point (`bin/rails db:*`, Rails' spawned `db:test:prepare` subprocess) is covered; the test helper no longer sets `DATABASE_URL` at all.
-- **Schema from the engine's own migrations** — the dummy app has no `db/` of its own: `test/test_helper.rb` points `migrations_paths` at the gem's `db/migrate` and runs them (idempotent) before the suite, so tests can use `users`/`roles`/`role_users`/`ldap_servers`.
-- **One-time setup**: `cd test/dummy && RAILS_ENV=test bin/rails db:create`. Then run the suite with `bin/test` from the gem root.
-
-## CI/CD — gem publish (`.github/workflows/gempush.yml`)
-
-The RubyGems publish workflow's `on: push` trigger is scoped to `branches: [release/3]` only, not an unscoped `push`. This was tightened after an incident on a sibling repo (`thecore_generators`) where an unscoped trigger published a version bump pushed to an unreviewed feature branch. Keep the trigger scoped to `release/3` so publishing only ever happens on a merge/push to the actual release branch.
+- One-time setup: `cd test/dummy && RAILS_ENV=test bin/rails db:create`. Run the suite with `bin/test` from the gem root.
+- Seeds: `rails db:seed` (or `rails thecore_auth_commons:db:seed` in host context).
 
 ## Development workflow
 
-- **Update this CLAUDE.md** when adding models, changing the auth flow, adding OAuth providers, or modifying permission resolution logic.
+- **Update this CLAUDE.md, or the `docs/agents/` file it points to,** when adding models, changing the auth flow, adding OAuth providers, or modifying permission resolution logic.
 - **Update README.md** when environment variables, setup steps, or user-facing behaviour change.
 - The engine has no host-specific logic. Keep it generic; host-app customization belongs in `config/initializers/` of the host app.
-
-## Security scanning
-
-Configured in the GitHub repository settings, not in files:
-
-- **CodeQL** default setup (Ruby, the Actions workflows, and JavaScript/TypeScript where the gem
-  ships any): on every push to `release/3`, on pull requests and weekly. Findings: Security → Code
-  scanning.
-- **Secret scanning with push protection**: a push containing a recognised secret is rejected. It
-  is the only check that blocks anything. If it fires on a real secret, remove it from the commit and
-  rotate the secret; never bypass it.
-- **Dependabot alerts and security updates**, but no `dependabot.yml`, so no routine version-bump
-  pull requests. This gem commits no `Gemfile.lock`, so Dependabot only sees the gemspec and the
-  workflow Actions: CVEs in the resolved Ruby dependencies are caught by `bundler-audit` in the host
-  apps' pipelines, whose `Gemfile.lock` resolves every ATOM.
-- Findings never block a release: GitHub notifies the owner. When one needs work, open a GitHub
-  issue (see Agent skills).
 
 ## Agent skills
 
