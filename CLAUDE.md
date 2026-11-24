@@ -36,12 +36,12 @@ Rails engine that provides authentication (Devise: local, LDAP, OAuth2) and data
 - **`BackgroundLdapImportJob` queue**: `"#{ENV["COMPOSE_PROJECT_NAME"]}_default"` — same pattern as the host app's scheduled jobs.
 - **No upward references**: this is the lowest Thecore layer: it must never reference gems above it (`model_driven_api`, `rails_admin` via `thecore_ui_rails_admin`); `test/eager_load_test.rb` guards it.
 - **Postgres only**, never SQLite. `test/dummy/config/boot.rb` rewrites `DATABASE_URL`'s database name so tests never touch the host's dev DB.
-- **Gem publish**: `.github/workflows/gempush.yml` publishes when `lib/*/version.rb` changes; keep its `on: push` trigger scoped to `release/3`.
+- **Gem publish**: `.github/workflows/gempush.yml` runs the test suite (PostgreSQL 15, Ruby 3.3, JUnit report kept as the `junit` artifact) on every push and pull request on `release/3`; on a push its `publish` job runs only when the tests are green, and only for a version in `lib/*/version.rb` with no tag yet: it tags it, creates the GitHub release with the JUnit report attached, and pushes the gem to RubyGems. A red test never publishes. Keep its `on: push` trigger scoped to `release/3`.
 - **Secret push protection**: if it fires on a real secret, remove it from the commit and rotate the secret; never bypass it.
 
 ## Commands
 
-- One-time setup: `cd test/dummy && RAILS_ENV=test bin/rails db:create`. Run the suite with `bin/test` from the gem root.
+- One-time setup: `cd test/dummy && RAILS_ENV=test bin/rails db:create`. Run the suite with `bin/test` from the gem root; `JUNIT_REPORT_DIR=tmp/junit bin/test` also writes the JUnit XML, as CI does.
 - Seeds: `rails db:seed` (or `rails thecore_auth_commons:db:seed` in host context).
 
 ## Development workflow

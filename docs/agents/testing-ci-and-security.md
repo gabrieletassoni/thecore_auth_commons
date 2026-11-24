@@ -13,7 +13,9 @@ This is the lowest Thecore layer: it must never reference gems above it (`model_
 - **Schema from the engine's own migrations** — the dummy app has no `db/` of its own: `test/test_helper.rb` points `migrations_paths` at the gem's `db/migrate` and runs them (idempotent) before the suite, so tests can use `users`/`roles`/`role_users`/`ldap_servers`.
 - **One-time setup**: `cd test/dummy && RAILS_ENV=test bin/rails db:create`. Then run the suite with `bin/test` from the gem root.
 
-## CI/CD — gem publish (`.github/workflows/gempush.yml`)
+## CI/CD — tests and gem publish (`.github/workflows/gempush.yml`)
+
+`.github/workflows/gempush.yml` runs the test suite (PostgreSQL 15, Ruby 3.3, JUnit report kept as the `junit` artifact) on every push and pull request on `release/3`; on a push its `publish` job runs only when the tests are green, and only for a version in `lib/*/version.rb` with no tag yet: it tags it, creates the GitHub release with the JUnit report attached, and pushes the gem to RubyGems. A red test never publishes. The JUnit hook is `test/support/junit_report.rb` (minitest-reporters, active only when `JUNIT_REPORT_DIR` is set). CI sets `CI=true`, so `test/dummy` eager-loads there.
 
 The RubyGems publish workflow's `on: push` trigger is scoped to `branches: [release/3]` only, not an unscoped `push`. This was tightened after an incident on a sibling repo (`thecore_generators`) where an unscoped trigger published a version bump pushed to an unreviewed feature branch. Keep the trigger scoped to `release/3` so publishing only ever happens on a merge/push to the actual release branch.
 
@@ -25,7 +27,7 @@ Configured in the GitHub repository settings, not in files:
   ships any): on every push to `release/3`, on pull requests and weekly. Findings: Security → Code
   scanning.
 - **Secret scanning with push protection**: a push containing a recognised secret is rejected. It
-  is the only check that blocks anything. If it fires on a real secret, remove it from the commit and
+  is the only security check that blocks anything (a red test suite blocks the gem publish). If it fires on a real secret, remove it from the commit and
   rotate the secret; never bypass it.
 - **Dependabot alerts and security updates**, but no `dependabot.yml`, so no routine version-bump
   pull requests. This gem commits no `Gemfile.lock`, so Dependabot only sees the gemspec and the
