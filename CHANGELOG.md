@@ -1,5 +1,10 @@
 # Changelog
 
+## [3.6.4] - 2026-11-24
+
+### Fixed
+- **`LdapServer#test_connection` reports the outcome** (thecore_ui_rails_admin#17). It returns an `LdapServer::ConnectionResult` (`success?`, `message`) instead of nothing: a refused admin bind is a failure with the server's reason (it used to look like success), and missing admin credentials or an unreachable/unresolvable host are failures with a message instead of a raised `Net::LDAP` error.
+
 ## [3.6.3] - 2026-10-28
 
 ### Security

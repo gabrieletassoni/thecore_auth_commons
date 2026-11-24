@@ -33,3 +33,7 @@ Run `rails db:seed` (or `rails thecore_auth_commons:db:seed` in host context). C
 ## Devise 5 (3.6.0)
 
 Requires `devise >= 5.0.4, < 6` (was `~> 4.8`) for CVE-2026-40295: with `:timeoutable` (which `User` uses), Devise <= 5.0.3 redirected a non-GET request hitting an expired session to the unvalidated, attacker-controlled `Referer` (open redirect). The confirmable race (CVE-2026-32700) does not apply (`User` has no `:confirmable`). No removed Devise 5 API is used anywhere in the ecosystem; host-app checks (session + JWT login, 29 auth routes with and without Google/Entra providers) are identical on 4.9.4 and 5.0.4. The host's `test/integration/devise_timeout_open_redirect_test.rb` reproduces the CVE (red on 4.9.4).
+
+## LdapServer#test_connection
+
+`LdapServer#test_connection` binds as `admin_user` and returns an `LdapServer::ConnectionResult` (`success?`, `message`): the server's reason for a refused bind, the `Net::LDAP::Error` message for a host it cannot reach or resolve, and "No admin user and password are configured for this server" (without contacting it) when either is blank. It never raises a `Net::LDAP::Error`. Until 3.6.4 it returned nothing (a refused bind looked like success) and raised for the other two cases; `thecore_ui_rails_admin`'s `test_ldap_server` action shows the result (thecore_ui_rails_admin#17). Covered by `test/ldap_server_test_connection_test.rb`.

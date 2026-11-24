@@ -14,8 +14,18 @@ class LdapServer < ApplicationRecord
   # and need a local password set by hand to log in again.
   after_destroy :turn_users_into_local_users
 
+  # The outcome of #test_connection: success? and, when it failed, the reason in message.
+  ConnectionResult = Data.define(:success, :message) do
+    def success? = success
+  end
+
+  # Binds as the admin user and reports whether that worked, and why not. Never raises for a
+  # server it cannot reach or bind to: the RailsAdmin test_ldap_server action shows the result.
   def test_connection
-    # Test the connection to the LDAP server
+    if admin_user.blank? || admin_password.blank?
+      return ConnectionResult.new(success: false, message: "No admin user and password are configured for this server")
+    end
+
     ldap = Net::LDAP.new(
       host: host,
       port: port,
@@ -26,14 +36,17 @@ class LdapServer < ApplicationRecord
         password: admin_password
       }
     )
-    # Perform a simple bind to check the connection
     if ldap.bind
-      # Connection successful
       Rails.logger.info "Connection to LDAP server #{host} successful."
+      ConnectionResult.new(success: true, message: nil)
     else
-      # Connection failed
-      Rails.logger.info "Connection to LDAP server #{host} failed: #{ldap.get_operation_result.message}"
+      reason = ldap.get_operation_result.message
+      Rails.logger.info "Connection to LDAP server #{host} failed: #{reason}"
+      ConnectionResult.new(success: false, message: reason)
     end
+  rescue Net::LDAP::Error => e
+    Rails.logger.info "Connection to LDAP server #{host} failed: #{e.message}"
+    ConnectionResult.new(success: false, message: e.message)
   end
 
   private
