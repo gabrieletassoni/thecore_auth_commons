@@ -3,6 +3,9 @@ it:
     test_connection:
       no_admin_credentials: "Utente e password di amministrazione non configurati per questo server"
   devise:
+    failure:
+      # A locked user is refused with the same words as a wrong password (User#inactive_message)
+      locked: "Credenziali %{authentication_keys} o password non valide."
     sessions:
       invalid: "Credenziali %{authentication_keys} o password non valide."
       user:

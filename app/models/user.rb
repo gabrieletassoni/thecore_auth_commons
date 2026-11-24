@@ -38,6 +38,18 @@ class User < ApplicationRecord
     record.errors.add(attr, I18n.t("validation.errors.cannot_lock_last_admin")) if record.locked_changed? && record.locked_was == false && User.where(locked: false).count == 1
   end
   
+  # Devise asks this at every login (local, LDAP, OAuth) and at every request of an open session:
+  # a locked user is signed out and refused. model_driven_api and thecore_backend_commons ask it
+  # too, for the API login, each API request and the ActionCable connection (Odoo #6051).
+  def active_for_authentication?
+    super && !locked?
+  end
+
+  # The refusal reads like a wrong password, so it doesn't reveal that the account exists.
+  def inactive_message
+    locked? ? :locked : super
+  end
+
   def display_name
     email
   end

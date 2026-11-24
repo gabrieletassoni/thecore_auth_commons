@@ -3,6 +3,9 @@ en:
     test_connection:
       no_admin_credentials: "No admin user and password are configured for this server"
   devise:
+    failure:
+      # A locked user is refused with the same words as a wrong password (User#inactive_message)
+      locked: "Invalid credentials or password."
     sessions:
       invalid: "Invalid credentials or password."
       user:

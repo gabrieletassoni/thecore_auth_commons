@@ -10,6 +10,10 @@
 3. On LDAP success, calls `ThecoreAuthCommons.align_user` which find-or-initializes the User, maps LDAP attributes to model fields, assigns roles from `memberOf` groups, and saves with `validate: false`.
 4. If both fail, renders the login form with `401`.
 
+## Locked users
+
+`users.locked` (set from RailsAdmin) is enforced by `User#active_for_authentication?` (`super && !locked?`), since 3.7.0. Devise asks it on every web login (local, LDAP, OAuth: `sign_in` runs Warden's `after_set_user` hook) and on every request of an open session, so a user locked mid-session is signed out at the next request. The refusal uses `inactive_message` `:locked`, whose text (`devise.failure.locked`, en + it) is the wrong-password one, so it doesn't reveal the account exists. model_driven_api (API login, each JWT request, OAuth callback), thecore-spot-overrides (M2M token) and thecore_backend_commons (ActionCable) ask the same predicate: keep it the single place where "may this user authenticate" is decided. Before 3.7.0 `locked` was checked nowhere (Odoo #6051). Covered by `test/locked_user_web_login_test.rb`; the dummy app mounts `devise_for :users` and a signed-in-only `root` for it.
+
 ## LDAP group → role mapping
 
 `align_user` reads `entry[:memberOf]`, extracts the CN (`group.split(",").first.split("=").last`), and calls `Role.find_or_create_by(name: group_name)`. Groups named `Administrators`, `Domain Admins`, `Schema Admins`, `Enterprise Admins`, `admins`, `administrators` also set `user.admin = true` (only promotes, never demotes an existing admin).

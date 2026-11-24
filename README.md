@@ -94,6 +94,10 @@ user.roles << role
 
 `Users::SessionsController#create` tries Devise first; if that fails it tries `Ldap::Authenticator`. On successful LDAP auth the user is created/updated via `ThecoreAuthCommons.align_user` and signed in.
 
+### Locked users
+
+A user with `locked = true` can't sign in through any channel (password, LDAP, OAuth) and an open session ends at its next request; the message is the same as for a wrong password. `User#active_for_authentication?` is the check, also used by the API, M2M tokens and ActionCable in the gems above.
+
 ### LDAP servers (`LdapServer` model)
 
 Multiple servers are supported, ordered by `priority` (ascending). Each server configures:
