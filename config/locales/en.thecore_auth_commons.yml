@@ -1,4 +1,7 @@
 en:
+  ldap_server:
+    test_connection:
+      no_admin_credentials: "No admin user and password are configured for this server"
   devise:
     sessions:
       invalid: "Invalid credentials or password."

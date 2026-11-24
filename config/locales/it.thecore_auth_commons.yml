@@ -1,4 +1,7 @@
 it:
+  ldap_server:
+    test_connection:
+      no_admin_credentials: "Utente e password di amministrazione non configurati per questo server"
   devise:
     sessions:
       invalid: "Credenziali %{authentication_keys} o password non valide."

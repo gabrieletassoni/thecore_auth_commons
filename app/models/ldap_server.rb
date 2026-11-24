@@ -21,9 +21,11 @@ class LdapServer < ApplicationRecord
 
   # Binds as the admin user and reports whether that worked, and why not. Never raises for a
   # server it cannot reach or bind to: the RailsAdmin test_ldap_server action shows the result.
+  # net-ldap raises Net::LDAP::Error for most connection failures, but the bare Errno (a
+  # SystemCallError, e.g. ECONNREFUSED) for a single host it cannot connect to.
   def test_connection
     if admin_user.blank? || admin_password.blank?
-      return ConnectionResult.new(success: false, message: "No admin user and password are configured for this server")
+      return ConnectionResult.new(success: false, message: I18n.t("ldap_server.test_connection.no_admin_credentials"))
     end
 
     ldap = Net::LDAP.new(
@@ -44,7 +46,7 @@ class LdapServer < ApplicationRecord
       Rails.logger.info "Connection to LDAP server #{host} failed: #{reason}"
       ConnectionResult.new(success: false, message: reason)
     end
-  rescue Net::LDAP::Error => e
+  rescue Net::LDAP::Error, SystemCallError => e
     Rails.logger.info "Connection to LDAP server #{host} failed: #{e.message}"
     ConnectionResult.new(success: false, message: e.message)
   end

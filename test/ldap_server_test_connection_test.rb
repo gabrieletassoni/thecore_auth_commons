@@ -33,12 +33,23 @@ class LdapServerTestConnectionTest < ActiveSupport::TestCase
   end
 
   test "an unresolvable host fails with the connection error" do
-    @server.update!(host: "no-such-host.invalid")
+    unresolvable = FakeLdap.new
+    unresolvable.define_singleton_method(:bind) { raise Net::LDAP::Error, "getaddrinfo: Name or service not known" }
+
+    result = Net::LDAP.stub(:new, unresolvable) { @server.test_connection }
+
+    assert_not result.success?
+    assert_equal "getaddrinfo: Name or service not known", result.message
+  end
+
+  # net-ldap raises the bare Errno for a single host, not a Net::LDAP::Error.
+  test "a host refusing the connection fails with the connection error" do
+    @server.update!(host: "127.0.0.1", port: 1)
 
     result = @server.test_connection
 
     assert_not result.success?
-    assert_match(/getaddrinfo/, result.message)
+    assert_match(/Connection refused/, result.message)
   end
 
   # Stands in for Net::LDAP: answers bind, and get_operation_result like net-ldap's OpenStruct.

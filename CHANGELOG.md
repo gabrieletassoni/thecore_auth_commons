@@ -1,5 +1,11 @@
 # Changelog
 
+## [3.6.5] - 2026-11-24
+
+### Fixed
+- `LdapServer#test_connection` raised `Errno::ECONNREFUSED` for a host that refuses the connection: net-ldap raises the bare `SystemCallError` for a single host, not a `Net::LDAP::Error`. It is now a failure with the reason, like the other connection errors (thecore_ui_rails_admin#17).
+- The "no admin credentials" reason is translated (`ldap_server.test_connection.no_admin_credentials`, en + it).
+
 ## [3.6.4] - 2026-11-24
 
 ### Fixed
