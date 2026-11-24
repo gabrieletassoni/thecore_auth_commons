@@ -6,6 +6,7 @@ require_relative "../test/dummy/config/environment"
 ActiveRecord::Migrator.migrations_paths = [File.expand_path("../db/migrate", __dir__)]
 ActiveRecord::Tasks::DatabaseTasks.migrate
 require "rails/test_help"
+require_relative "support/junit_report"
 
 # Load fixtures from the engine
 if ActiveSupport::TestCase.respond_to?(:fixture_path=)
