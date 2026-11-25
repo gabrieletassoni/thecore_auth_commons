@@ -14,6 +14,30 @@ class LdapServer < ApplicationRecord
   # and need a local password set by hand to log in again.
   after_destroy :turn_users_into_local_users
 
+  # admin_password is write-only (host ADR 0046 point 10): the authenticator and test_connection
+  # read it, nothing serializes it. `methods:` is dropped too, since attributes,
+  # attributes_before_type_cast and friends would carry it, and LdapServer serializes no method.
+  WRITE_ONLY_ATTRIBUTES = %w[admin_password].freeze
+
+  # model_driven_api >= 3.17.0 leaves these out of v3's JSON:API serializers, which read the
+  # columns directly instead of going through serializable_hash.
+  def self.write_only_attributes
+    WRITE_ONLY_ATTRIBUTES
+  end
+
+  def serializable_hash(options = nil)
+    options = (options || {}).to_h.symbolize_keys.except(:methods)
+    options[:except] = Array(options[:except]) + WRITE_ONLY_ATTRIBUTES.map(&:to_sym)
+    options[:only] = Array(options[:only]).map(&:to_s) - WRITE_ONLY_ATTRIBUTES if options[:only]
+    super(options).except(*WRITE_ONLY_ATTRIBUTES)
+  end
+
+  # Not searchable nor sortable through Ransack (the API's q[...] and s): a filter on it would
+  # tell the password character by character.
+  def self.ransackable_attributes(auth_object = nil)
+    (defined?(super) ? super : column_names) - WRITE_ONLY_ATTRIBUTES
+  end
+
   # The outcome of #test_connection: success? and, when it failed, the reason in message.
   ConnectionResult = Data.define(:success, :message) do
     def success? = success

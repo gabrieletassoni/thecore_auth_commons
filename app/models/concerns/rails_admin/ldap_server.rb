@@ -8,6 +8,9 @@ module RailsAdmin::LdapServer
       rails_admin do
         navigation_label I18n.t('admin.settings.label')
         navigation_icon 'fa fa-passport'
+        # Write-only (host ADR 0046 point 10): RailsAdmin's password type shows it only in the edit
+        # form, empty, and a blank submit leaves the stored value as it is.
+        configure :admin_password, :password
       end
     end
   end

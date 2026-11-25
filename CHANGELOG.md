@@ -1,5 +1,14 @@
 # Changelog
 
+## [3.8.0] - 2026-11-25
+
+### Security
+- **Failed-login limit per IP** (host Odoo #6052). `ThecoreAuthCommons::LoginFailureThrottle`, a middleware right after `ActionDispatch::RemoteIp`: after `THECORE_LOGIN_FAILURES_PER_MINUTE` (default 20, `0` = off) failed attempts in the current minute from one IP, `POST /users/sign_in`, `POST /api/vN/authenticate` and the OAuth callbacks answer 429 (`Retry-After`, JSON on `/api/`) until the minute ends. Only failures count (401, or an OAuth callback refused), so the right password is never limited, behind a NAT either. X-Forwarded-For counts only from a trusted proxy. Counters in Redis (`THECORE_LOGIN_THROTTLE_REDIS_URL`, else `REDIS_URL`; fails open if Redis is down), in memory without it, nowhere in the test environment unless a test sets `LoginFailureThrottle.store`.
+- **`ldap_servers.admin_password` is write-only** (host Odoo #6084, host ADR 0046 point 10): never serialized (`serializable_hash` drops it whatever `only`/`methods` ask, and ignores `methods:`), not in `ransackable_attributes`, a RailsAdmin `:password` field (edit only, blank keeps it), declared in `LdapServer.write_only_attributes` (model_driven_api >= 3.17.0 keeps it out of v3), and its index is dropped (migration `RemoveAdminPasswordIndexFromLdapServers`).
+
+### Changed
+- Requires `thecore_settings` >= 3.1.0 (write-only Secret settings).
+
 ## [3.6.5] - 2026-11-24
 
 ### Fixed
