@@ -27,7 +27,8 @@ class Users::SessionsController < Devise::SessionsController
   # the wrong-password answer, never the failure app's 302, which would tell that the password was
   # right. Devise refuses by throw :warden from its after_set_user hook (after logging the user
   # out) wherever the user is first authenticated in this request: in create, in sign_in after
-  # LDAP, or already in a before_action reading current_user (thecore_ui_commons' reject_locked!),
+  # LDAP, or already in a host's before_action reading current_user (thecore_ui_commons <= 3.4.0
+  # did, in reject_locked!),
   # since Devise lets the password strategy run on the form params for the whole sign-in request.
   # So the catch wraps the whole action, callbacks included.
   def process_action(*)
