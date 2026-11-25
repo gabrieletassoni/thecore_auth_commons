@@ -1,17 +1,14 @@
 # app/controllers/users/sessions_controller.rb
 class Users::SessionsController < Devise::SessionsController
   def create
-    self.resource = warden.authenticate(auth_options)
+    self.resource = local_user
 
     if resource
       Rails.logger.info("Authentication: Found local user, signing in")
       sign_in_and_redirect(resource)
     else
       Rails.logger.info("Authentication: Not found a local user, trying LDAP")
-      user = Ldap::Authenticator.new(
-        email: params[:user][:email],
-        password: params[:user][:password],
-      ).authenticate
+      user = ldap_user
 
       if user
         sign_in_and_redirect(user)
@@ -26,6 +23,23 @@ class Users::SessionsController < Devise::SessionsController
   end
 
   private
+
+  # A user Devise refuses (User#active_for_authentication? false: a locked one) must get the same
+  # answer as a wrong password, never the failure app's redirect, which would tell that the
+  # password was right. Devise refuses by throw :warden from its after_set_user hook, after
+  # logging the user out: caught here, it becomes "no local user".
+  def local_user
+    user = catch(:warden) { warden.authenticate(auth_options) }
+    user if user.is_a?(resource_class)
+  end
+
+  def ldap_user
+    user = Ldap::Authenticator.new(
+      email: params[:user][:email],
+      password: params[:user][:password],
+    ).authenticate
+    user if user&.active_for_authentication?
+  end
 
   def sign_in_and_redirect(resource)
     set_flash_message!(:notice, :signed_in)

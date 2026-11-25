@@ -5,7 +5,7 @@ en:
   devise:
     failure:
       # A locked user is refused with the same words as a wrong password (User#inactive_message)
-      locked: "Invalid credentials or password."
+      user_locked: "Invalid credentials or password."
     sessions:
       invalid: "Invalid credentials or password."
       user:

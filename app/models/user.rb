@@ -39,15 +39,16 @@ class User < ApplicationRecord
   end
   
   # Devise asks this at every login (local, LDAP, OAuth) and at every request of an open session:
-  # a locked user is signed out and refused. model_driven_api and thecore_backend_commons ask it
-  # too, for the API login, each API request and the ActionCable connection (Odoo #6051).
+  # a locked user is signed out and refused. Every other way to authenticate must ask it too
+  # (Odoo #6051).
   def active_for_authentication?
     super && !locked?
   end
 
-  # The refusal reads like a wrong password, so it doesn't reveal that the account exists.
+  # The refusal reads like a wrong password, so it doesn't reveal that the account exists. Not
+  # Devise's :locked key: hosts and devise-i18n translate it as "Your account is locked."
   def inactive_message
-    locked? ? :locked : super
+    locked? ? :user_locked : super
   end
 
   def display_name

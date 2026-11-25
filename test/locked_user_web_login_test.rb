@@ -2,8 +2,9 @@ require "test_helper"
 require "minitest/mock"
 
 # A locked user (users.locked, set from RailsAdmin) must not use the web app through any login
-# channel, and an already open session must end at its next request (Odoo #6051). The refusal
-# reads like a wrong password, so it doesn't tell whether the account exists.
+# channel, and an already open session must end at its next request (Odoo #6051). The sign-in
+# form refuses them exactly like a wrong password (same status, same words), so it tells neither
+# that the account exists nor that the password was right.
 class LockedUserWebLoginTest < ActionDispatch::IntegrationTest
   PASSWORD = "Local-Pass-123!".freeze
 
@@ -11,7 +12,12 @@ class LockedUserWebLoginTest < ActionDispatch::IntegrationTest
     # The last unlocked user can't be locked (User validation): keep another one around.
     User.create!(email: "other@example.com", password: PASSWORD, password_confirmation: PASSWORD)
     @user = User.create!(email: "worker@example.com", password: PASSWORD, password_confirmation: PASSWORD)
+    # Devise's lockable key, which hosts and devise-i18n translate as "Your account is locked.":
+    # the refusal must never read it.
+    I18n.backend.store_translations(:en, devise: { failure: { locked: "Your account is locked." } })
   end
+
+  teardown { I18n.reload! }
 
   test "an unlocked user signs in with a password" do
     sign_in_with PASSWORD
@@ -21,15 +27,20 @@ class LockedUserWebLoginTest < ActionDispatch::IntegrationTest
     assert_equal "signed in as worker@example.com", response.body
   end
 
-  test "a locked user is refused with the right password, with the wrong-password message" do
+  test "a wrong password is refused with 401 and the generic message" do
     sign_in_with "Wrong-Pass-123!"
-    wrong_password_alert = flash[:alert]
+
+    assert_response :unauthorized
+    assert_equal "Invalid credentials or password.", flash[:alert]
+  end
+
+  test "a locked user is refused with the right password exactly like a wrong password" do
     @user.update!(locked: true)
 
     sign_in_with PASSWORD
 
-    assert_redirected_to new_user_session_path
-    assert_equal wrong_password_alert, flash[:alert]
+    assert_response :unauthorized
+    assert_equal "Invalid credentials or password.", flash[:alert]
     assert_not_signed_in
   end
 
@@ -41,7 +52,8 @@ class LockedUserWebLoginTest < ActionDispatch::IntegrationTest
       sign_in_with "the-ldap-password"
     end
 
-    assert_redirected_to new_user_session_path
+    assert_response :unauthorized
+    assert_equal "Invalid credentials or password.", flash[:alert]
     assert_not_signed_in
   end
 
@@ -51,6 +63,7 @@ class LockedUserWebLoginTest < ActionDispatch::IntegrationTest
     get "/test_oauth/google", env: { "omniauth.auth" => oauth_hash(@user.email) }
 
     assert_redirected_to new_user_session_path
+    assert_equal "Invalid credentials or password.", flash[:alert]
     assert_not_signed_in
   end
 

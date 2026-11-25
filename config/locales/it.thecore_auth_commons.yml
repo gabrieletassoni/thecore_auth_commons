@@ -5,7 +5,7 @@ it:
   devise:
     failure:
       # A locked user is refused with the same words as a wrong password (User#inactive_message)
-      locked: "Credenziali %{authentication_keys} o password non valide."
+      user_locked: "Credenziali %{authentication_keys} o password non valide."
     sessions:
       invalid: "Credenziali %{authentication_keys} o password non valide."
       user:
