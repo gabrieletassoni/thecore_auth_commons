@@ -5,5 +5,11 @@ module ThecoreAuthCommons
     initializer "thecore_auth_commons.login_failure_throttle" do |app|
       app.middleware.insert_after ActionDispatch::RemoteIp, ThecoreAuthCommons::LoginFailureThrottle
     end
+
+    # Right before Devise's Warden::Manager: the first request's Warden must see the strategies
+    # Devise registers when the lazily drawn routes load (host Odoo #6329).
+    initializer "thecore_auth_commons.load_routes_before_warden" do |app|
+      app.middleware.insert_before Warden::Manager, ThecoreAuthCommons::LoadRoutesBeforeWarden, app
+    end
   end
 end

@@ -1,5 +1,10 @@
 # Changelog
 
+## [3.8.2] - 2026-11-26
+
+### Fixed
+- **The first sign-in of a process is no longer refused** (host Odoo #6329). With `config.eager_load` off (development, tests outside CI) Rails >= 8.0 draws the routes on the first request, inside the router, and only then does Devise register Warden's strategies; Warden had already copied its config, with none, so the first request's sign-in got 401 with the right password and an open session looked signed out once. `ThecoreAuthCommons::LoadRoutesBeforeWarden`, right before `Warden::Manager`, loads the routes first. Production (eager load) and Rails 7.2 were not affected; there the middleware only passes the request on.
+
 ## [3.8.1] - 2026-11-26
 
 ### Security

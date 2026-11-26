@@ -14,6 +14,7 @@ require "omniauth-google-oauth2"
 require "omniauth-entra-id"
 
 require "thecore_auth_commons/login_failure_throttle"
+require "thecore_auth_commons/load_routes_before_warden"
 require "thecore_auth_commons/engine"
 
 require "thecore/seed"

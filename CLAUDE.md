@@ -19,7 +19,7 @@ Rails engine that provides authentication (Devise: local, LDAP, OAuth2) and data
 | --- | --- |
 | Full file tree | `docs/agents/repository-layout.md` |
 | Ability layers, permission order, multiple roles, `can`/`cannot` | `docs/agents/authorization.md` |
-| Login flow, LDAP group → role, OAuth2 `check_user`, seeds/first admin, LdapServer removal, Devise 5, failed-login limit, write-only `admin_password` | `docs/agents/authentication.md` |
+| Login flow, LDAP group → role, OAuth2 `check_user`, seeds/first admin, LdapServer removal, Devise 5, routes before Warden, failed-login limit, write-only `admin_password` | `docs/agents/authentication.md` |
 | No upward references, Postgres test setup, gem publish workflow, security scanning | `docs/agents/testing-ci-and-security.md` |
 | Tickets (GitHub Issues), triage labels, glossary/ADR layout | `docs/agents/issue-tracker.md`, `triage-labels.md`, `domain.md` |
 
@@ -34,6 +34,7 @@ Rails engine that provides authentication (Devise: local, LDAP, OAuth2) and data
 - **Locked users**: `User#active_for_authentication?` (`super && !locked?`) is the one check every login channel and every request uses, here and in the gems above; the sign-in form answers exactly like a wrong password (401), elsewhere `devise.failure.user_locked` with the same words; never Devise's `:locked` key (`docs/agents/authentication.md`).
 - **First admin** is seeded only when no admin exists (keep this guard: existing installations must not change); its generated password is never logged. Seeds must run after all models are loaded (`Target` rows come from `ApplicationRecord.subclasses`).
 - **Failed-login limit** (`LoginFailureThrottle`, 3.8.0): only failures count, X-Forwarded-For only from trusted proxies, `THECORE_LOGIN_FAILURES_PER_MINUTE` (20, 0 = off), NullStore in tests (`docs/agents/authentication.md`).
+- **Routes load before Warden** (`LoadRoutesBeforeWarden`, 3.8.2): with lazy routes (Rails 8, eager_load off) the first request's Warden had no Devise strategy, so the first sign-in of a process was refused; keep it right before `Warden::Manager` (`docs/agents/authentication.md`).
 - **`LdapServer#admin_password` is write-only**: never serialized, not ransackable, RailsAdmin `:password` field; never add a path that returns it (`docs/agents/authentication.md`).
 - **LdapServer destroy keeps its users** (turns them into local users); never destroy them (`docs/agents/authentication.md`).
 - **`BackgroundLdapImportJob` queue**: `"#{ENV["COMPOSE_PROJECT_NAME"]}_default"` — same pattern as the host app's scheduled jobs.

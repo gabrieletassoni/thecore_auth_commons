@@ -31,7 +31,9 @@ config/initializers/
   omniauth.rb                       # Registers Entra ID / Google providers when env vars present
 lib/
   thecore_auth_commons.rb           # Module-level helpers: seed_first_admin, check_user, align_user, generate_secure_password, import_ldap_users_task, entra_id_vars?, google_oauth2_vars?
-  thecore_auth_commons/engine.rb
+  thecore_auth_commons/engine.rb    # Inserts the two middlewares below
+  thecore_auth_commons/login_failure_throttle.rb     # LoginFailureThrottle: per-IP failed-login limit, right after RemoteIp
+  thecore_auth_commons/load_routes_before_warden.rb  # LoadRoutesBeforeWarden: lazy routes loaded before Warden::Manager (host Odoo #6329)
   thecore/seed.rb
 db/
   seeds.rb                          # Creates first admin; populates predicates/actions/targets
