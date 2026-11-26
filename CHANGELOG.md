@@ -1,5 +1,10 @@
 # Changelog
 
+## [3.8.1] - 2026-11-26
+
+### Security
+- `User#check_password_and_confirmation_equal` (a `validate` callback) is `private` (host Odoo #6314): a callback is lifecycle, not API, and the API's `a[methods]` could call it. It still validates as before.
+
 ## [3.8.0] - 2026-11-25
 
 ### Security
