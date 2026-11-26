@@ -62,7 +62,10 @@ class User < ApplicationRecord
   def authenticate password
     self&.valid_password?(password) ? self : nil
   end
-  
+
+  private
+
+  # Validation callback: lifecycle, not API (host Odoo #6314).
   def check_password_and_confirmation_equal
     errors.add(:password, I18n.t("validation.errors.password_and_confirm_must_be_the_same")) unless password == password_confirmation
   end
